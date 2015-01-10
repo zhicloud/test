@@ -1,6 +1,18 @@
 ﻿
 ****************************************************
 
+版本号：node_client2.0#20150109-1
+
+主要变更：
+	1、逻辑修改：禁止云主机访问宿主机所在网段功能时，所在网段改为通过本机地址动态计算得出。
+	2、修复蒋捷发现的bug：
+		Traceback (most recent call last):
+		  File "/home/zhicloud/src/node_client/build/node_client/out00-PYZ.pyz/snapshot_collector", line 311, in collectAllHost
+		  File "/home/zhicloud/src/node_client/build/node_client/out00-PYZ.pyz/libvirt", line 1191, in getCPUStats
+		libvirtError: Requested operation is not valid: domain is not running
+	
+****************************************************
+
 版本号：2.0#20150108-1
 
 主要变更：
