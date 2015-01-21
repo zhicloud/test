@@ -1,4 +1,17 @@
 
+版本号：2.0#20150121-1
+
+主要变更：
+	1、增加接口/gateway/file_upload，支持web向http_gateway上传文件。
+	2、更新接口/gateway/isoImage?command=upload，支持http gateway向web推送创建进度信息及创建结果(已完善)。
+	3、增加消息推送消息类型iso_image_upload_progress，支持推送光盘镜像上传进度信息。
+	4、增加消息推送消息类型iso_image_upload_result，支持推送上传光盘镜像结果。
+
+兼容性说明：
+	1.云管理平台2.0
+
+********************************
+
 版本号：2.0#20150115-1
 
 主要变更：
