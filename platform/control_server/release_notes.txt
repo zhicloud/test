@@ -1,6 +1,13 @@
 ﻿
 ********************************
 
+版本号：control_server2.0#20150204-1
+
+主要变更：
+	1、修复后台不断报resume 1 port(s) with public ip '1.1.1.96' into address pool 'c8bce8010d934d60a03bedf8fa42e4e6'的bug。
+	
+********************************
+
 版本号：control_server2.0#20150202-1
 
 主要变更：
