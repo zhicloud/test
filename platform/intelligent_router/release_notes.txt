@@ -1,5 +1,13 @@
 ﻿
 ******************************************************
+
+版本号：intelligent_router2.0#20150204-2
+
+主要变更：
+	1、修复local variable 'output_port_snat_count' referenced before assignment的bug。
+
+******************************************************
+
 版本号：intelligent_router2.0#20150202-1
 
 主要变更：
