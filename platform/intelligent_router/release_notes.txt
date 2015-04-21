@@ -1,6 +1,13 @@
 ﻿
 ********************************
 
+版本号：intelligent_router2.0#20150421-1
+
+主要变更：
+	1、修复UnboundLocalError: local variable '_public_ip' referenced before assignment
+
+********************************
+
 版本号：intelligent_router2.0#20150420-1
 
 主要变更：
