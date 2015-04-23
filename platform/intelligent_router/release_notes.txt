@@ -1,6 +1,14 @@
 ﻿
 ********************************
 
+版本号：intelligent_router2.0#20150422-1
+
+主要变更：
+	1、修复ir后台不断报：ValueError: invalid literal for int() with base 10: '' 的bug。
+	2、修复在云主机创建不成功的时候forwarder没有清除的bug。
+
+********************************
+
 版本号：intelligent_router2.0#20150421-1
 
 主要变更：
