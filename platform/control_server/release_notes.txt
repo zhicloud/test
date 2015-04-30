@@ -1,6 +1,19 @@
 ﻿
 ********************************
 
+版本号：control_server2.0#20150430-1
+
+主要变更：
+	1、解决以下bug：
+	Traceback (most recent call last):
+	  File"/tmp/control_server/build/control_server/out00-PYZ.pyz/control_service",line 316, in handleEventMessage
+	  File"/tmp/control_server/build/control_server/out00-PYZ.pyz/control_service",line 656, in handleTimeout
+	  File"/tmp/control_server/build/control_server/out00-PYZ.pyz/control_service",line 1008, in handleMonitorTimeout
+	  File"/tmp/control_server/build/control_server/out00-PYZ.pyz/control_service",line 1353, in notifyHostMonitorData
+	AttributeError: 'NoneType' object has no attribute 'uuid'
+	
+********************************
+
 版本号：control_server2.0#20150429-2
 
 主要变更：
