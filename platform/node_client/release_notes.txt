@@ -1,3 +1,14 @@
+
+********************************
+
+版本号：node_client2.0#20150430-1
+
+主要变更：
+	1.解决以下bug：
+	Traceback (most recent call last):
+	  File	"/home/zhicloud/src/node_client/build/node_client/out00-PYZ.pyz/snapshot_collector",line 305, in collectAllHost
+	  File	"/home/zhicloud/src/node_client/build/node_client/out00-PYZ.pyz/libvirt",line 411, in XMLDesc
+	  libvirtError: Domain not found: no domain with matching uuid 'f0d23c89-df55-4ba3-b9fb-77e7c54ec65f'
 ﻿
 ********************************
 
