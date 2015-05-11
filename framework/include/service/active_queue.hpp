@@ -121,6 +121,14 @@ namespace zhicloud{
                     return false;
                 }
             }
+            ActiveQueue(const ActiveQueue& other):ring_mask(BufferSize - 1)
+            {
+                copy(other);
+            }
+            ActiveQueue& operator=(const ActiveQueue& other){
+                copy(other);
+                return *this;
+            }
 
         protected:
             virtual bool onStart(){
@@ -331,6 +339,16 @@ namespace zhicloud{
                 if(!isRunning()){
                     throw StoppedException();
                 }
+            }
+            void copy(const ActiveQueue& other){
+                ring_buffer = other.ring_buffer;
+                ring_flag = other.ring_flag;
+                ring_cursor.store(other.ring_cursor.load());
+                consume_cursor.store(other.consume_cursor.load());
+                gating_position.set(other.gating_position.get());
+                ring_shift = other.ring_shift;
+                wait_strategy = other.wait_strategy;
+                need_signal.store(other.need_signal.load());
             }
         private:
             std::array< T, BufferSize > ring_buffer;

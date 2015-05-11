@@ -103,6 +103,9 @@ namespace zhicloud{
             task_id_type getTaskID() const{
                 return task_id;
             }
+            void releaseResource(session_type& session){
+                clearTimer(session);
+            }
         protected:
             bool sendMessage(AppMessage& msg, const string& receiver){
                 return *invoke_send_message(msg, receiver);
