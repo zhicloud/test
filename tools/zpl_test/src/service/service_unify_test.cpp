@@ -14,6 +14,7 @@
 #include "message_queue_test.h"
 #include "timed_invoker_test.h"
 #include "timer_service_test.h"
+#include "node_service_test.h"
 
 
 using namespace std;
@@ -32,6 +33,15 @@ bool ServiceUnifyTest::test() {
     try{
         string section_name("service");
         BOOST_LOG_TRIVIAL(info) << "begin test section " << section_name << "...";
+
+		{
+		    NodeServiceTest test;
+			if (!test.test())
+			{
+                throw std::logic_error("node service test fail");
+			}
+            BOOST_LOG_TRIVIAL(info) << "node service test success";
+		}
         {
             ActiveQueueTest test;
             if(!test.test()){

@@ -68,8 +68,10 @@ typedef ProcessRule< session_type > rule_type;
 
 class Proxy{
 public:
+	bool success;
     Proxy(){
         logger = getLogger("Proxy");
+		success = true;
     }
     bool sendMessage(AppMessage& msg, const string& receiver){
         BOOST_LOG_TRIVIAL(info) << boost::format("sendMessage called, msg:%d, receiver '%s'")
@@ -107,16 +109,22 @@ public:
 
 typedef BaseTask< session_type, Proxy > T;
 
-class CreateHost:public T
+class CreateHost:public BaseTask< UglySession, Proxy >
 {
 public:
+	bool success;
+	Proxy* ch_proxy;
+
     CreateHost(Proxy* p_proxy):T(TaskType::create_host, "CreateHost", (uint32_t)RequestEnum::create_host, p_proxy)
     {
     	uint32_t stateOne;
 		uint32_t stateTwo;
+
         addState("stQuery", stateOne);
 		addState("observer", stateTwo);
 
+		p_proxy->success = true;
+		ch_proxy = p_proxy;
 
         addTransferRule((uint32_t)State::initial, AppMessage::message_type::RESPONSE, (uint32_t)RequestEnum::query_host,
                         rule_type::Result::any, boost::bind(&CreateHost::onstateone, this, _1, _2), (uint32_t)State::stateOne);
@@ -131,6 +139,7 @@ public:
 		current_state = (uint32_t)State::initial;
         /*BOOST_LOG_TRIVIAL(info) << boost::format("[%08X]recv CreateHost request, step_num %d")
                      %session.getSessionID() %current_state;*/
+		//p_proxy->success = true;
     }
 
     void onEvent(AppMessage& event, session_type& session){
@@ -149,14 +158,15 @@ public:
     void onstateone(AppMessage& event, session_type& session){
 
 		try{
-	    	current_state++;
-			if ((uint32_t)State::stateOne != current_state)
+	    	//current_state++;
+			if ((uint32_t)State::initial != session.getCurrentState())
 			{
+				ch_proxy->success = false;
                 throw std::logic_error((boost::format("[%08X]current state err on state one, current state: %d")
-									%session.getSessionID() %current_state).str());
+									%session.getSessionID() %session.getCurrentState()).str());
 			}
-			/*BOOST_LOG_TRIVIAL(info) << boost::format("[%08X]CreateHost one, current state %d, event id %d")
-						 %session.getSessionID() %current_state %event.id ;*/
+			BOOST_LOG_TRIVIAL(info) << boost::format("[%08X]CreateHost one, current state %d, event id %d")
+						 %session.getSessionID() %current_state %event.id ;
 		}
 		catch(exception& ex){
 			BOOST_LOG_TRIVIAL(error) << "CreateHost task exception:" << ex.what();
@@ -166,14 +176,15 @@ public:
     void onstatetwo(AppMessage& event, session_type& session){
 
 		try{
-	    	current_state++;
-			if ((uint32_t)State::stateTwo!= current_state)
+	    	//current_state++;
+			if ((uint32_t)State::stateOne!= session.getCurrentState())
 			{
+				ch_proxy->success = false;
                 throw std::logic_error((boost::format("[%08X]current state err on state two, current state: %d")
-									%session.getSessionID() %current_state).str());
+									%session.getSessionID() %session.getCurrentState()).str());
 			}
-			/*BOOST_LOG_TRIVIAL(info) << boost::format("[%08X]CreateHost two, current state %d, event id %d")
-						 %session.getSessionID() %current_state %event.id ;*/
+			BOOST_LOG_TRIVIAL(info) << boost::format("[%08X]CreateHost two, current state %d, event id %d")
+						 %session.getSessionID() %current_state %event.id ;
 		}
 		catch(exception& ex){
 			BOOST_LOG_TRIVIAL(error) << "CreateHost task exception:" << ex.what();
@@ -184,14 +195,15 @@ public:
     void onstatethree(AppMessage& event, session_type& session){
 
 		try{
-	    	current_state++;
-			if ((uint32_t)State::stateThree!= current_state)
+	    	//current_state++;
+			if ((uint32_t)State::stateTwo!= session.getCurrentState())
 			{
+				ch_proxy->success = false;
                 throw std::logic_error((boost::format("[%08X]current state err on state three, current state: %d")
-									%session.getSessionID() %current_state).str());
+									%session.getSessionID() %session.getCurrentState()).str());
 			}
-			/*BOOST_LOG_TRIVIAL(info) << boost::format("[%08X]CreateHost three, current state %d, event id %d")
-						 %session.getSessionID() %current_state %event.id ;*/
+			BOOST_LOG_TRIVIAL(info) << boost::format("[%08X]CreateHost three, current state %d, event id %d")
+						 %session.getSessionID() %current_state %event.id ;
 		}
 		catch(exception& ex){
 			BOOST_LOG_TRIVIAL(error) << "CreateHost task exception:" << ex.what();
@@ -212,6 +224,8 @@ private:
 class DeleteHost:public T
 {
 public:
+	Proxy* dh_proxy;
+	
     DeleteHost(Proxy* p_proxy):T(TaskType::delete_host, "DeleteHost", (uint32_t)RequestEnum::delete_host, p_proxy)
     {
 
@@ -224,7 +238,8 @@ public:
 		addState("stateThree", stateThree);
 		addState("stateFour", stateFour);
 
-
+		dh_proxy = p_proxy;
+		p_proxy->success = true;
 
         addTransferRule((uint32_t)State::initial, AppMessage::message_type::RESPONSE, (uint32_t)RequestEnum::delete_host,
                         rule_type::Result::success, boost::bind(&DeleteHost::on_step_one, this, _1, _2), (uint32_t)State::stateOne);
@@ -252,13 +267,14 @@ public:
 
     void on_step_one(AppMessage& event, session_type& session){
 		try{
-	    	current_state++;
-			if ((uint32_t)State::stateOne != current_state)
+	    	//current_state++;
+			if ((uint32_t)State::initial != session.getCurrentState())
 			{
+				dh_proxy->success = false;
                 throw std::logic_error("current state err on state one");
 			}
-			/*BOOST_LOG_TRIVIAL(info) << boost::format("[%08X]DeleteHost one, current state %d, event id %d")
-						 %session.getSessionID() %current_state %event.id ;*/
+			BOOST_LOG_TRIVIAL(info) << boost::format("[%08X]DeleteHost one, current state %d, event id %d")
+						 %session.getSessionID() %session.getCurrentState() %event.id ;
 		}
 		catch(exception& ex){
 			BOOST_LOG_TRIVIAL(error) << "DeleteHost task exception:" << ex.what();
@@ -268,13 +284,14 @@ public:
     void on_step_two(AppMessage& event, session_type& session){
 
 		try{
-	    	current_state++;
-			if ((uint32_t)State::stateTwo!= current_state)
+	    	//current_state++;
+			if ((uint32_t)State::stateOne!= session.getCurrentState())
 			{
+				dh_proxy->success = false;
                 throw std::logic_error("current state err on state two");
 			}
-			/*BOOST_LOG_TRIVIAL(info) << boost::format("[%08X]DeleteHost two, current state %d, event id %d")
-						 %session.getSessionID() %current_state %event.id ;*/
+			BOOST_LOG_TRIVIAL(info) << boost::format("[%08X]DeleteHost two, current state %d, event id %d")
+						 %session.getSessionID() %session.getCurrentState() %event.id ;
 		}
 		catch(exception& ex){
 			BOOST_LOG_TRIVIAL(error) << "DeleteHost task exception:" << ex.what();
@@ -284,13 +301,14 @@ public:
     void on_step_three(AppMessage& event, session_type& session){
 
 		try{
-	    	current_state++;
-			if ((uint32_t)State::stateThree!= current_state)
+	    	//current_state++;
+			if ((uint32_t)State::stateTwo!= session.getCurrentState())
 			{
+				dh_proxy->success = false;
                 throw std::logic_error("current state err on state three");
 			}
-			/*BOOST_LOG_TRIVIAL(info) << boost::format("[%08X]DeleteHost three, current state %d, event id %d")
-						 %session.getSessionID() %current_state %event.id ;*/
+			BOOST_LOG_TRIVIAL(info) << boost::format("[%08X]DeleteHost three, current state %d, event id %d")
+						 %session.getSessionID() %session.getCurrentState() %event.id ;
 		}
 		catch(exception& ex){
 			BOOST_LOG_TRIVIAL(error) << "DeleteHost task exception:" << ex.what();
@@ -311,12 +329,15 @@ private:
 
 typedef BaseManager< T > task_manager_type;
 
-class TaskManager:public task_manager_type{
+class TaskManager:public BaseManager< BaseTask< session_type, Proxy > >{
 public:
+	bool success;
     TaskManager(Proxy* p_proxy):task_manager_type(my_max_session, my_thread_count){
         addTask(new CreateHost(p_proxy));
         //addTask(new CreateHost(p_proxy));
         addTask(new DeleteHost(p_proxy));
+
+		success = true;
     }
 
 	void ManagerTaskAdd(Proxy* p_proxy)
@@ -881,6 +902,7 @@ bool BaseManagerTest::test_recombination9(){
 
 	int idx = 0;
 	int index = 0;
+	bool result = true;
 	for (index = 0; index < 1; index++)
 	{
 		boost::uniform_int<> real(1, 999);
@@ -909,7 +931,7 @@ bool BaseManagerTest::test_recombination9(){
 				task_manager.processMessage(delete_session, msg2);
 				task_manager.processMessage(delete_session, msg3);
 				task_manager.processMessage(delete_session, msg4);
-				task_manager.processMessage(delete_session, msg5);
+
 			}
 			else
 			{
@@ -922,8 +944,9 @@ bool BaseManagerTest::test_recombination9(){
 
 				task_manager.startTransaction(create_session, msg_create1);
 				task_manager.processMessage(create_session, msg_create2);
-				task_manager.processMessage(create_session, msg_create3);
+				//task_manager.processMessage(create_session, msg_create3);
 				//task_manager.processMessage(create_session, msg_create4);
+
 
 			}
 			idx++;
@@ -934,10 +957,15 @@ bool BaseManagerTest::test_recombination9(){
 	}
 
 	this_thread::sleep_for(chrono::seconds(14));
+	if (!proxy.success)
+	{
+		BOOST_LOG_TRIVIAL(info)<<"base manager test fail";
+		result = false;
+	}
 
     task_manager.stop();
 
-    return true;
+    return result;
 }
 
 

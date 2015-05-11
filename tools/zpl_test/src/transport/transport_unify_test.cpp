@@ -25,7 +25,7 @@ bool TransportUnifyTest::test()
     try{
         string section_name("transport");
         BOOST_LOG_TRIVIAL(info) << "begin test section " << section_name << "...";
-
+		
         /*{
 			string server_ip;
 			cout<<"PacketHandler test begin, please input server ip:"<<endl;
@@ -38,7 +38,7 @@ bool TransportUnifyTest::test()
             }
         }*/
         {
-			string server_ip("172.16.2.174");
+			string server_ip;
 			cout<<"Transporter test begin, please input server ip:"<<endl;
 			cin>>server_ip;
 
