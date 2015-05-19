@@ -1,10 +1,10 @@
 #ifndef BASE_SESSION_H
 #define BASE_SESSION_H
+
 #include <string>
 #include <list>
+#include <mutex>
 #include <transport/app_message.h>
-#include <boost/thread/lock_types.hpp>
-#include <boost/thread/recursive_mutex.hpp>
 
 using zhicloud::transport::AppMessage;
 
@@ -13,9 +13,8 @@ namespace zhicloud{
         template < typename T >
         class BaseSession
         {
-        	private:
             protected:
-                typedef boost::recursive_mutex::scoped_lock lock_type;
+                typedef std::lock_guard< std::mutex > lock_type;
 
             public:
                 typedef uint32_t session_id_type;
@@ -31,28 +30,31 @@ namespace zhicloud{
                 virtual ~BaseSession(){
                 }
                 void reset(){
+                    lock_type lock(mutex);
                     task_id = T::invalid;
                     initialed = false;
                     current_state = (state_type)StateEnum::initial;
                     request_module.clear();
                     request_session = 0;
-                    timer_id = 0;
-                    blocked = false;
+                    timer_id = getInvalidTimer();
                     state_specified = false;
-                    message_queue.clear();
+                    _loop_timer = false;
+                    _allocated = false;
+                    _attach_index = 0;
                     onReset();
                 }
                 bool occupy(const T& task){
                     lock_type lock(mutex);
+                    if(_allocated)
+                        return false;
                     task_id = task;
+                    _allocated = true;
                     return true;
                 }
                 bool isInitialed(){
-                    lock_type lock(mutex);
                     return initialed;
                 }
                 void initial(const AppMessage& msg){
-                    lock_type lock(mutex);
                     initial_message = msg;
                     current_state = (state_type)StateEnum::initial;
                     request_module = msg.sender;
@@ -65,51 +67,28 @@ namespace zhicloud{
                 constexpr static state_type getFinishState(){
                     return (state_type)StateEnum::finish;
                 }
-                bool isFinished(){
-                    lock_type lock(mutex);
+                bool isFinished() const{
                     return ((state_type)StateEnum::finish == current_state);
                 }
                 void finish(){
-                    lock_type lock(mutex);
                     current_state = (state_type)StateEnum::finish;
                 }
                 void setState(const state_type& next_state){
-                    lock_type lock(mutex);
                     if(current_state != (state_type)StateEnum::initial)
                     {
                         state_specified = true;
                     }
                     current_state = next_state;
                 }
-                void putMessage(AppMessage& msg){
-                    lock_type lock(mutex);
-                    message_queue.push_back(std::move(msg));
-                }
-                void insertMessage(AppMessage& msg){
-                    lock_type lock(mutex);
-                    message_queue.push_front(std::move(msg));
-                }
-                bool fetchMessage(list< AppMessage >& message_list){
-                    lock_type lock(mutex);
-                    if(message_queue.empty()){
-                        return false;
-                    }
-                    message_list = std::move(message_queue);
-                    message_queue.clear();
-                    return true;
-                }
 
                 AppMessage& getInitialMessage(){
-                    lock_type lock(mutex);
                     return initial_message;
                 }
 
                 state_type getCurrentState() const{
-                    lock_type lock(mutex);
                     return current_state;
                 }
                 void next(const state_type& state){
-                    lock_type lock(mutex);
                     if((state_type)StateEnum::finish != current_state){
                         if(state_specified)
                             state_specified = false;
@@ -117,62 +96,83 @@ namespace zhicloud{
                             current_state = state;
                     }
                 }
-                void setTimerID(const timer_id_type& id){
-                    lock_type lock(mutex);
-                    timer_id = id;
+                constexpr static timer_id_type getInvalidTimer(){
+                	return 0;
                 }
-                timer_id_type getTimerID() const{
-                    lock_type lock(mutex);
+                void setTimerID(const timer_id_type& id, const bool& loop = false){
+                    timer_id = id;
+                    _loop_timer = loop;
+                }
+                const timer_id_type& getTimerID() const{
                     return timer_id;
                 }
-                task_id_type getTaskID() const{
-                    lock_type lock(mutex);
+                bool isTimerSetted() const{
+                    return (timer_id != getInvalidTimer());
+                }
+
+                const bool& isLoopTimer() const{
+                    return _loop_timer;
+                }
+                void resetTimer(){
+                    _loop_timer = false;
+                    timer_id = getInvalidTimer();
+                }
+
+                const task_id_type& getTaskID() const{
                     return task_id;
                 }
                 const session_id_type& getSessionID() const{
-                    lock_type lock(mutex);
                     return session_id;
                 }
                 const string& getRequestModule() const{
-                    lock_type lock(mutex);
                     return request_module;
                 }
                 const session_id_type& getRequestSession() const{
-                    lock_type lock(mutex);
                     return request_session;
                 }
 
+                const uint16_t& attach_index() const{
+                    return _attach_index;
+                }
+
+                void attach_index(const uint16_t& value){
+                    _attach_index = value;
+                }
+
                 BaseSession(BaseSession&& other){
-                    session_id = std::move(other.session_id);
-                    task_id = std::move(other.task_id);
-                    initialed = std::move(other.initialed);
-                    current_state = std::move(other.current_state);
-                    initial_message = std::move(other.initial_message);
-                    request_module = std::move(other.request_module);
-                    request_session = std::move(other.request_session);
-                    timer_id = std::move(other.timer_id);
-                    blocked = std::move(other.blocked);
-                    state_specified = std::move(other.state_specified);
-                    message_queue = std::move(other.message_queue);
+                    move_contruct(std::move(other));
                 }
                 BaseSession& operator=(BaseSession&& other){
-                    session_id = std::move(other.session_id);
-                    task_id = std::move(other.task_id);
-                    initialed = std::move(other.initialed);
-                    current_state = std::move(other.current_state);
-                    initial_message = std::move(other.initial_message);
-                    request_module = std::move(other.request_module);
-                    request_session = std::move(other.request_session);
-                    timer_id = std::move(other.timer_id);
-                    blocked = std::move(other.blocked);
-                    state_specified = std::move(other.state_specified);
-                    message_queue = std::move(other.message_queue);
+                    move_contruct(std::move(other));
                     return *this;
                 }
             protected:
                 virtual void onReset(){
                     //reset member here
                 }
+            private:
+                void move_contruct(BaseSession&& other){
+                    session_id = std::move(other.session_id);
+                    task_id = std::move(other.task_id);
+                    initialed = std::move(other.initialed);
+                    current_state = std::move(other.current_state);
+                    initial_message = std::move(other.initial_message);
+                    request_module = std::move(other.request_module);
+                    request_session = std::move(other.request_session);
+                    timer_id = std::move(other.timer_id);
+                    state_specified = std::move(other.state_specified);
+                    _loop_timer = std::move(other._loop_timer);
+                    _allocated = std::move(other._allocated);
+                    _attach_index = std::move(other._attach_index);
+                }
+            protected:
+                mutable std::mutex mutex;
+
+            private:
+                enum class StateEnum:state_type{
+                        initial = 0,
+                        finish = 0xFFFF,
+                };
                 session_id_type session_id;
                 T task_id;
                 bool initialed;
@@ -181,15 +181,12 @@ namespace zhicloud{
                 string request_module;
                 session_id_type request_session;
                 timer_id_type timer_id;
-                bool blocked;
                 bool state_specified;
-                mutable boost::recursive_mutex mutex;
-                list< AppMessage > message_queue;
-            private:
-        		enum class StateEnum:state_type{
-        			initial = 0,
-        			finish = 0xFFFF,
-        		};
+                bool _loop_timer;
+                bool _allocated;
+                uint16_t _attach_index;
+
+
         };
     }
 }

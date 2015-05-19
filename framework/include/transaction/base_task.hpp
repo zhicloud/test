@@ -77,6 +77,10 @@ namespace zhicloud{
                                      %session.getSessionID() %msg.sequence %session.getTimerID());
                         return;
                     }
+                    //clear single timer id
+                    if(!session.isLoopTimer()){
+                        session.resetTimer();
+                    }
                 }
                 state_type current_state = session.getCurrentState();
                 if(state_map.end() == state_map.find(current_state)){
@@ -120,25 +124,31 @@ namespace zhicloud{
             }
 
             void setTimer(session_type& session, const uint32_t& interval){
+                if(session.isTimerSetted()){
+                    logger->warn(boost::format("[%08X]old timer %d override by set timer")
+                                     %session.getSessionID() %session.getTimerID());
+                }
                 timer_id_type timer_id = *invoke_set_timer(interval, session.getSessionID());
                 session.setTimerID(timer_id);
             }
 
             void setLoopTimer(session_type& session, const uint32_t& interval){
+                if(session.isTimerSetted()){
+                    logger->warn(boost::format("<Whisper>[%08X]old timer %d override by set loop timer")
+                                     %session.getSessionID() %session.getTimerID());
+                }
                 timer_id_type timer_id = *invoke_set_loop_timer(interval, session.getSessionID());
-                session.setTimerID(timer_id);
+                session.setTimerID(timer_id, true);
             }
 
             void clearTimer(session_type& session){
-                timer_id_type timer_id = session.getTimerID();
-                if(0 < timer_id){
-                    if(*invoke_clear_timer(timer_id)){
-                        session.setTimerID(0);
-                    }
-                    else{
+                if(session.isTimerSetted()){
+                    timer_id_type timer_id = session.getTimerID();
+                    if(!*invoke_clear_timer(timer_id)){
                         logger->warn(boost::format("[%08X]clear timer fail, timer id %d")
                                      %session.getSessionID() %timer_id);
                     }
+                    session.resetTimer();
                 }
             }
             void taskFail(session_type& session){
