@@ -1,5 +1,5 @@
 ******************************************************
-版本号：2.0#201505019-1
+版本号：2.0#201505019-2
 
 主要变更：
 1、实现Transport::Whisper协议
@@ -8,6 +8,10 @@
 4、优化事务管理中定时器记录处理，对于非循环定时器，超时触发后会自动清除
 5、BaseSession除分配释放外所有数据访问去除多线程保护，提高处理速度
 6、分配和启动事务合并为startTransaction，启动失败的事务自动释放，不再允许上层显式dealloc
+7、修正BaseManager已分配会话被自动释放的问题
+8、修正transport::EndpointManager已分配节点被自动释放的问题
+9、修正transport::TaskManager已分配任务被自动释放的问题
+10、修正transport::WhisperTaskManager已分配会话被自动释放的问题
 
 兼容性说明：
 1、分配和启动事务合并为startTransaction，启动失败的事务自动释放，不再允许上层显式dealloc

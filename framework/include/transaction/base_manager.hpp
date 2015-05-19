@@ -74,11 +74,19 @@ namespace zhicloud{
                 session_id_type last_seed = _last_seed.load();
                 for(session_id_type offset = 0; offset < _session_count; offset++){
                     session_id = (last_seed + offset)%_session_count + _min_session;
+                    expect = false;
                     if(_allocate_map[session_id].compare_exchange_strong(expect, true)){
+//                        logger->info(boost::format("<TaskManager>[%x]debug:session [%08X] => allocated")
+//                                  %std::this_thread::get_id() %session_id);
                         //unallocate
                         if(!_session_map[session_id].occupy(task_id)){
                             //occupy fail
+                            expect = true;
                             _allocate_map[session_id].compare_exchange_strong(expect, false);
+//                            if(_allocate_map[session_id].compare_exchange_strong(expect, false)){
+//                                logger->info(boost::format("<TaskManager>[%x]debug:session [%08X] => re deallocated")
+//                                      %std::this_thread::get_id() %session_id);
+//                            }
                             continue;
                         }
                         _last_seed.store((session_id)%_session_count);
@@ -105,7 +113,7 @@ namespace zhicloud{
 
             bool processMessage(const session_id_type& session_id, AppMessage& msg){
                 if(!isValid(session_id))
-                return false;
+                    return false;
                 if(!_allocate_map[session_id].load())
                     return false;
                 queue_index_type index = _session_map[session_id].attach_index();
@@ -148,6 +156,8 @@ namespace zhicloud{
                     return;
                 bool expect(true);
                 if(_allocate_map[session_id].compare_exchange_strong(expect, false)){
+//                    logger->info(boost::format("<TaskManager>[%x]debug:session [%08X] => deallocated")
+//                                  %std::this_thread::get_id() %session_id);
                     _session_map[session_id].reset();
                     return;
                 }
