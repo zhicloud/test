@@ -26,6 +26,7 @@ namespace zhicloud{
             typedef WhisperSession::session_id_type task_id_type;
             Whisper(const string& ip, const size_t& channel_count, const string& path, const size_t& work_thread = 2);
             virtual ~Whisper();
+            const string& ip() const;
             const uint16_t& control_port() const;
             template <class T >
             void bindObserver(T* observer){

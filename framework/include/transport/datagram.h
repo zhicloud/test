@@ -24,7 +24,7 @@ namespace zhicloud{
                 Datagram(const unsigned short& sequence, const string& content = "", bool ack = false);
                 virtual ~Datagram();
                 string toString();
-                static void fromString(const string& input, list<Datagram>& data_output, list<unsigned short>& ack_list)  throw (exception);
+                static void fromString(const string& input, list<Datagram>& data_output, list<unsigned short>& ack_list);
                 const uint16_t& seq() const;
                 void seq(const uint16_t& value);
                 const string& data() const;

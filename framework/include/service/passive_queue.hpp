@@ -221,7 +221,7 @@ namespace zhicloud{
                     wait_event.notify_all();
                 }
             }
-            void checkStatus() throw(InvalidateException){
+            void checkStatus(){
                 if(invalidate_flag.load()){
                     throw InvalidateException();
                 }

@@ -28,7 +28,7 @@ namespace zhicloud{
                 Command& operator=(const Command& other);
                 Command& operator=(Command&& other);
                 virtual ~Command();
-                static void unpackageFromRawdata(const string& data, list<Command>& output) throw(exception);
+                static void unpackageFromRawdata(const string& data, list<Command>& output);
                 string toString() const;
 
                 const session_id_type& session() const;

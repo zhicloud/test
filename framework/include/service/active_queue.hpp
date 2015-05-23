@@ -335,7 +335,7 @@ namespace zhicloud{
                     }
                 }
             }
-            void checkStatus() throw(StoppedException){
+            void checkStatus(){
                 if(!isRunning()){
                     throw StoppedException();
                 }

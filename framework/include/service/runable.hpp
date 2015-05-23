@@ -16,7 +16,9 @@ namespace zhicloud{
                 };
             public:
                 Runable():status(ServiceStatus::stopped){}
-                virtual ~Runable(){}
+                virtual ~Runable(){
+                    stop();
+                }
                 bool start(){
                     lock_type lock(mutex);
                     ServiceStatus expect(ServiceStatus::stopped);

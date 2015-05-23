@@ -1,58 +1,86 @@
 #ifndef TIMERSERVICE_H
 #define TIMERSERVICE_H
-#include <map>
+
+#include <vector>
+#include <atomic>
+#include <chrono>
+#include <mutex>
 #include <transport/app_message.h>
 #include <service/timed_invoker.h>
-#include <boost/thread/recursive_mutex.hpp>
+#include <util/copyable_atomic.hpp>
 
 namespace zhicloud{
     namespace service{
         using zhicloud::transport::AppMessage;
-        using std::map;
+
         class TimerService
         {
             public:
-                typedef int32_t timer_id_type;
+                typedef uint32_t timer_id_type;
                 typedef uint32_t timeout_type;
                 typedef uint32_t session_id_type;
                 typedef list< AppMessage > event_list_type;
                 typedef boost::signals2::signal< void (event_list_type&) > event_type;
                 typedef event_type::slot_type event_handler;
 
-                TimerService(const uint32_t& interval = 1);
+                TimerService(const uint32_t& interval_in_seconds = 1, const size_t& max_timer = 1024);
                 virtual ~TimerService();
                 void bindHandler(const event_handler& handler);
                 bool start();
                 void stop();
-                timer_id_type setTimer(const timeout_type& timeout, const session_id_type& session);
-                timer_id_type setLoopTimer(const timeout_type& timeout, const session_id_type& session);
-                timer_id_type setTimedEvent(const AppMessage& event, const timeout_type& timeout);
-                timer_id_type setLoopTimedEvent(const AppMessage& event, const timeout_type& timeout);
+                timer_id_type setTimer(const timeout_type& seconds, const session_id_type& session_id);
+                timer_id_type setLoopTimer(const timeout_type& interval_seconds, const session_id_type& session_id);
+                timer_id_type setTimedEvent(const AppMessage& event, const timeout_type& seconds);
+                timer_id_type setLoopTimedEvent(const AppMessage& event, const timeout_type& interval_seconds);
                 bool clearTimer(const timer_id_type& timer_id);
 
+                constexpr static timer_id_type getInvalidTimer(){
+                    return 0;
+                }
+
             private:
-                event_type onTimeoutInvoked;
                 void onCheckTimeout();
 
-                typedef boost::recursive_mutex::scoped_lock lock_type;
-                 struct TimerCounter{
-                    timer_id_type timer_id;
-                    session_id_type receive_session;
-                    timeout_type timeout;
-                    timeout_type count_down;
-                    bool is_loop;
-                    bool event_specified;
-                    AppMessage event;
+            private:
+                class TimerCounter{
+                public:
                     TimerCounter();
+                    ~TimerCounter();
                     TimerCounter(TimerCounter&& other);
-                };
-                typedef map< timer_id_type, TimerCounter > map_type;
+                    void reset();
+                    bool allocate(const timer_id_type& timer_id, const session_id_type& session_id, const timeout_type& seconds, const bool& loop = false);
+                    bool allocate(const timer_id_type& timer_id, const AppMessage& msg, const timeout_type& seconds, const bool& loop = false);
+                    const timer_id_type& timer_id() const;
+                    const std::chrono::time_point< std::chrono::high_resolution_clock >& timepoint() const;
+                    const bool& event_specified() const;
+                    const bool& is_loop() const;
+                    const session_id_type& receive_session() const;
+                    const AppMessage& event() const;
+                    void next();
+                private:
+                    TimerCounter& operator=(TimerCounter&& other);
 
-                static const timer_id_type max_timer = 1000;
-                boost::recursive_mutex mutex;
-                TimedInvoker invoker;
-                timer_id_type seed;
-                map_type timer_map;
+                private:
+                    timer_id_type _timer_id;
+                    session_id_type _receive_session;
+                    timeout_type _timeout;
+                    std::chrono::time_point< std::chrono::high_resolution_clock > _timepoint;
+                    bool _is_loop;
+                    bool _event_specified;
+                    bool _allocated;
+                    AppMessage _event;
+                    mutable std::mutex _mutex;
+                    typedef std::lock_guard< std::mutex > lock_type;
+                };
+
+                TimedInvoker _invoker;
+                event_type onTimeoutInvoked;
+                const static timer_id_type _min_timer_id;
+                size_t _max_timer;
+                std::vector< zhicloud::util::CopyableAtomic< bool > > _allocated;
+                std::vector< TimerCounter > _timer_slot;
+                std::atomic< timer_id_type > _id_seed;
+
         };
     }
 }

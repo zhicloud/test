@@ -39,8 +39,8 @@ namespace zhicloud{
                 explicit AppMessage(const message_type& type, const event_id_type& event_id);
                 explicit AppMessage();
                 virtual ~AppMessage();
-                void toString(string& output) throw(exception);
-                void fromString(const string& content) throw (exception);
+                void toString(string& output);
+                void fromString(const string& content);
                 //seter&getter
                 bool setInt(const key_type& key, const int& value);
                 bool setUInt(const key_type& key, const uint_type& value);
@@ -92,8 +92,8 @@ namespace zhicloud{
                 bool containsKey(const key_type& key) const;
             protected:
             private:
-                void writeParam(ostream& stream) throw (exception);
-                void readParam(istream& stream) throw (exception);
+                void writeParam(ostream& stream);
+                void readParam(istream& stream);
                 enum class param_type:uint32_t
                 {
                     INT = 0,
