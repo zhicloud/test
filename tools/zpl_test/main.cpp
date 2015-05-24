@@ -15,30 +15,34 @@ int main()
 {
     string section_name("build up");
     try{
+        bool service(true);
+        bool transport(false);
+        bool transaction(false);
+        bool utility(false);
 //        zhicloud::util::initialLogging();
 //        zhicloud::util::addFileAppender(".", "test", 40960000);
 
         //test service
-        {
+        if(service){
             ServiceUnifyTest serviceunify;
             if(!serviceunify.test()){
                 throw std::logic_error("service test fail");
             }
         }
-        {
+        if(transport){
             TransportUnifyTest test_case;
             if(!test_case.test()){
                 throw std::logic_error("transport test fail");
             }
         }
-		{
+		if(utility){
 			UtilityTest utilitytest;
 			if (!utilitytest.test())
 			{
 				throw std::logic_error("namespace util test failed");
 			}
     	}
-		{
+		if(transaction){
 			TransactionUnifyTest transunifytest;
 			if (!transunifytest.test())
 			{

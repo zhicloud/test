@@ -225,7 +225,7 @@ class DeleteHost:public T
 {
 public:
 	Proxy* dh_proxy;
-	
+
     DeleteHost(Proxy* p_proxy):T(TaskType::delete_host, "DeleteHost", (uint32_t)RequestEnum::delete_host, p_proxy)
     {
 
@@ -373,30 +373,21 @@ bool BaseManagerTest::test(){
 
     session_type::session_id_type session_id;
     {
+        AppMessage msg(AppMessage::message_type::REQUEST, RequestEnum::create_host);
 		for (int i = 0; i < my_max_session; i++)
 		{
-            if(!task_manager.allocTransaction(TaskType::create_host, session_id))
+            if(!task_manager.startTransaction(TaskType::create_host, msg, session_id))
             {
-                BOOST_LOG_TRIVIAL(warning) << "BaseManagerTest test allocTransaction "<< i <<" failed";
+                BOOST_LOG_TRIVIAL(warning) << "BaseManagerTest test startTransaction "<< i <<" failed";
                 return false;
             }
 		}
     }
     {
-        AppMessage msg(AppMessage::message_type::REQUEST, RequestEnum::create_host);
-
-        if(!task_manager.startTransaction(session_id, msg)){
-            BOOST_LOG_TRIVIAL(warning) << "BaseManagerTest test start task fail";
-            return false;
-        }
-        //BOOST_LOG_TRIVIAL(info) << "session " << session_id << " started";
-    }
-    {
         session_type::session_id_type delete_session;
-        task_manager.allocTransaction(TaskType::delete_host, delete_session);
         {
             AppMessage msg(AppMessage::message_type::REQUEST, RequestEnum::delete_host);
-            task_manager.startTransaction(delete_session, msg);
+            task_manager.startTransaction(TaskType::delete_host, msg, delete_session);
         }
 
     	this_thread::sleep_for(chrono::milliseconds(450));
@@ -431,48 +422,6 @@ bool BaseManagerTest::test(){
 }
 
 bool BaseManagerTest::test_allocTrans(){
-	vector< session_type::session_id_type > session_array;
-    Proxy proxy;
-    TaskManager task_manager(&proxy);
-
-    task_manager.start();
-
-    session_type::session_id_type session_id;
-    {
-		for (int i = 0; i < 10; i++)
-		{
-            if(!task_manager.allocTransaction(TaskType::create_host, session_id))
-            {
-                BOOST_LOG_TRIVIAL(warning) << "BaseManagerTest test_allocTrans allocTransaction "<< i <<" failed";
-                return false;
-            }
-			session_array.emplace_back(std::move(session_id));
-		}
-
-
-		for (int i = 0; i < 10; i++)
-		{
-			if (!task_manager.deallocTransaction(session_array[i]))
-			{
-                BOOST_LOG_TRIVIAL(info) << "BaseManagerTest test_allocTrans deallocTransaction "<< i <<" failed";
-				return false;
-			}
-		}
-
-		if (task_manager.deallocTransaction(5))
-		{
-			BOOST_LOG_TRIVIAL(info) << "abnormal, dealloc trans again!";
-			return false;
-		}
-
-		if (task_manager.deallocTransaction(15))
-		{
-			BOOST_LOG_TRIVIAL(info) << "abnormal, dealloc a unalloced trans!";
-			return false;
-		}
-    }
-
-    task_manager.stop();
 
     return true;
 }
@@ -490,17 +439,12 @@ bool BaseManagerTest::test_terminateTrans()
         int idx = 1;
         while(true == allcResult)
         {
-            if(!task_manager.allocTransaction(TaskType::create_host, session_id))
-            {
+			AppMessage msg(AppMessage::message_type::REQUEST, RequestEnum::create_host);
+			if(!task_manager.startTransaction(TaskType::create_host, msg, session_id)){
                 allcResult = false;
-                BOOST_LOG_TRIVIAL(info)<<"wangli test allocTransaction "<< idx <<" failed";
+				BOOST_LOG_TRIVIAL(info) << "test_terminateTrans start task fail";
 				idx++;
 				return false;
-            }
-
-			AppMessage msg(AppMessage::message_type::REQUEST, RequestEnum::create_host);
-			if(!task_manager.startTransaction(session_id, msg)){
-				BOOST_LOG_TRIVIAL(info) << "test_terminateTrans start task fail";
 			}
 
         }
@@ -536,17 +480,13 @@ bool BaseManagerTest::test_startTrans()
 	{
 		for (int i = 0; i < 5; i++)
 		{
-			if(!task_manager.allocTransaction(TaskType::create_host, session_id))
+            AppMessage msg(AppMessage::message_type::REQUEST, RequestEnum::create_host);
+			if(!task_manager.startTransaction(TaskType::create_host, msg, session_id))
 			{
-				BOOST_LOG_TRIVIAL(warning) << "BaseManagerTest test_startTrans allocTransaction "<< i <<" failed";
+				BOOST_LOG_TRIVIAL(warning) << "BaseManagerTest test_startTrans startTransaction "<< i <<" failed";
 				return false;
 			}
 
-			AppMessage msg(AppMessage::message_type::REQUEST, RequestEnum::create_host);
-			if(!task_manager.startTransaction(session_id, msg)){
-				BOOST_LOG_TRIVIAL(info) << "test_terminateTrans start task fail";
-				return false;
-			}
 		}
 	}
 
@@ -568,17 +508,13 @@ bool BaseManagerTest::test_processMessage()
 	{
 		for (int i = 0; i < 5; i++)
 		{
-			if(!task_manager.allocTransaction(TaskType::create_host, session_id))
+            AppMessage msg(AppMessage::message_type::REQUEST, RequestEnum::create_host);
+			if(!task_manager.startTransaction(TaskType::create_host, msg, session_id))
 			{
-				BOOST_LOG_TRIVIAL(warning) << "BaseManagerTest test_processMessage allocTransaction "<< i <<" failed";
+				BOOST_LOG_TRIVIAL(warning) << "BaseManagerTest test_processMessage startTransaction "<< i <<" failed";
 				return false;
 			}
 
-			AppMessage msg(AppMessage::message_type::REQUEST, RequestEnum::create_host);
-			if(!task_manager.startTransaction(session_id, msg)){
-				BOOST_LOG_TRIVIAL(info) << "test_terminateTrans start task fail";
-				return false;
-			}
 
 			AppMessage msg1(AppMessage::message_type::RESPONSE, RequestEnum::query_host);
 			msg1.success = true;
@@ -602,31 +538,6 @@ bool BaseManagerTest::test_processMessage()
 
 void BaseManagerTest::test_recombination1()
 {
-    Proxy proxy;
-    TaskManager task_manager(&proxy);
-
-    task_manager.start();
-
-    session_type::session_id_type session_id;
-	if(!task_manager.allocTransaction(TaskType::create_host, session_id))
-	{
-		BOOST_LOG_TRIVIAL(info)<<"wangli test allocTransaction failed";
-		return;
-	}
-
-	this_thread::sleep_for(chrono::milliseconds(450));
-
-	task_manager.deallocTransaction(session_id);
-
-	this_thread::sleep_for(chrono::milliseconds(450));
-
-	AppMessage msg(AppMessage::message_type::REQUEST, RequestEnum::create_host);
-	if(!task_manager.startTransaction(session_id, msg)){
-		BOOST_LOG_TRIVIAL(info) << "test_terminateTrans start task fail";
-	}
-
-    this_thread::sleep_for(chrono::seconds(4));
-    task_manager.stop();
 
 	return;
 }
@@ -641,7 +552,8 @@ void BaseManagerTest::test_recombination2()
     task_manager.start();
 
     session_type::session_id_type session_id;
-	if(!task_manager.allocTransaction(TaskType::create_host, session_id))
+    AppMessage msg(AppMessage::message_type::REQUEST, RequestEnum::create_host);
+	if(!task_manager.startTransaction(TaskType::create_host, msg, session_id))
 	{
 		BOOST_LOG_TRIVIAL(info)<<"wangli test allocTransaction failed";
 		return;
@@ -650,13 +562,6 @@ void BaseManagerTest::test_recombination2()
 	this_thread::sleep_for(chrono::milliseconds(450));
 
 	task_manager.terminateTransaction(session_id);
-
-	this_thread::sleep_for(chrono::milliseconds(450));
-
-	AppMessage msg(AppMessage::message_type::REQUEST, RequestEnum::create_host);
-	if(!task_manager.startTransaction(session_id, msg)){
-		BOOST_LOG_TRIVIAL(info) << "test_recombination2 start task fail";
-	}
 
     this_thread::sleep_for(chrono::seconds(4));
     task_manager.stop();
@@ -667,76 +572,12 @@ void BaseManagerTest::test_recombination2()
 
 void BaseManagerTest::test_recombination3()
 {
-    Proxy proxy;
-    TaskManager task_manager(&proxy);
-
-    task_manager.start();
-
-    session_type::session_id_type session_id;
-	if(!task_manager.allocTransaction(TaskType::create_host, session_id))
-	{
-		BOOST_LOG_TRIVIAL(info)<<"wangli create_host allocTransaction failed";
-		return;
-	}
-
-	this_thread::sleep_for(chrono::milliseconds(450));
-
-	task_manager.deallocTransaction(session_id);
-
-	this_thread::sleep_for(chrono::milliseconds(450));
-
-	session_type::session_id_type delete_session;
-	if(!task_manager.allocTransaction(TaskType::delete_host, delete_session))
-	{
-		BOOST_LOG_TRIVIAL(info)<<"wangli delete_host allocTransaction failed";
-		return;
-	}
-	AppMessage msg(AppMessage::message_type::REQUEST, RequestEnum::delete_host);
-	task_manager.startTransaction(delete_session, msg);
-
-    this_thread::sleep_for(chrono::seconds(4));
-    task_manager.stop();
-
 	return;
 }
 
 
 void BaseManagerTest::test_recombination4()
 {
-    Proxy proxy;
-    TaskManager task_manager(&proxy);
-
-    task_manager.start();
-
-    session_type::session_id_type session_id;
-	if(!task_manager.allocTransaction(TaskType::create_host, session_id))
-	{
-		BOOST_LOG_TRIVIAL(info)<<"wangli create_host allocTransaction failed";
-		return;
-	}
-	AppMessage msg(AppMessage::message_type::REQUEST, RequestEnum::create_host);
-	if(!task_manager.startTransaction(session_id, msg)){
-		BOOST_LOG_TRIVIAL(info) << "wangli create_host start task fail";
-	}
-
-	this_thread::sleep_for(chrono::milliseconds(450));
-
-	task_manager.deallocTransaction(session_id);
-
-	this_thread::sleep_for(chrono::milliseconds(450));
-
-	session_type::session_id_type delete_session;
-	if(!task_manager.allocTransaction(TaskType::delete_host, delete_session))
-	{
-		BOOST_LOG_TRIVIAL(info)<<"wangli delete_host allocTransaction failed";
-		return;
-	}
-	AppMessage msg1(AppMessage::message_type::REQUEST, RequestEnum::delete_host);
-	task_manager.startTransaction(delete_session, msg1);
-
-    this_thread::sleep_for(chrono::seconds(4));
-    task_manager.stop();
-
 	return;
 }
 
@@ -749,7 +590,6 @@ void BaseManagerTest::test_recombination5()
     task_manager.start();
 
     session_type::session_id_type create_session;
-	task_manager.allocTransaction(TaskType::create_host, create_session);
 	AppMessage msg_create1(AppMessage::message_type::REQUEST, RequestEnum::create_host);
 	AppMessage msg_create2(AppMessage::message_type::RESPONSE, RequestEnum::query_host);
 	AppMessage msg_create3(AppMessage::message_type::EVENT, RequestEnum::join_domain);
@@ -758,7 +598,7 @@ void BaseManagerTest::test_recombination5()
 
 
 
-	task_manager.startTransaction(create_session, msg_create1);
+	task_manager.startTransaction(TaskType::create_host, msg_create1, create_session);
 	task_manager.processMessage(create_session, msg_create2);
 	task_manager.processMessage(create_session, msg_create3);
 	task_manager.processMessage(create_session, msg_create4);
@@ -782,10 +622,9 @@ void BaseManagerTest::test_recombination6(){
 	while(idx < 5)
 	{
 		//session_type::session_id_type delete_session;
-		task_manager.allocTransaction(TaskType::delete_host, delete_session);
 		{
 			AppMessage msg(AppMessage::message_type::REQUEST, RequestEnum::delete_host);
-			task_manager.startTransaction(delete_session, msg);
+			task_manager.startTransaction(TaskType::delete_host, msg, delete_session);
 		}
 
 		//this_thread::sleep_for(chrono::milliseconds(450));
@@ -823,7 +662,6 @@ void BaseManagerTest::test_recombination7(){
 	while(idx < my_max_session)
 	{
 		//session_type::session_id_type delete_session;
-		task_manager.allocTransaction(TaskType::delete_host, delete_session);
 		AppMessage msg1(AppMessage::message_type::REQUEST, RequestEnum::delete_host);
 		//task_manager.startTransaction(delete_session, msg1);
 
@@ -834,7 +672,7 @@ void BaseManagerTest::test_recombination7(){
 		AppMessage msg3(AppMessage::message_type::RESPONSE, EventEnum::timeout);
 		msg3.success = true;
 
-		task_manager.startTransaction(delete_session, msg1);
+		task_manager.startTransaction(TaskType::delete_host, msg1, delete_session);
 		task_manager.processMessage(delete_session, msg2);
 		task_manager.processMessage(delete_session, msg3);
 
@@ -863,7 +701,6 @@ void BaseManagerTest::test_recombination8(){
 		BOOST_LOG_TRIVIAL(info)<<"test_recombination8 "<<index;
 		while(idx < my_max_session)
 		{
-			task_manager.allocTransaction(TaskType::delete_host, delete_session);
 			AppMessage msg1(AppMessage::message_type::REQUEST, RequestEnum::delete_host);
 
 			AppMessage msg2(AppMessage::message_type::RESPONSE, RequestEnum::delete_host);
@@ -872,7 +709,7 @@ void BaseManagerTest::test_recombination8(){
 			AppMessage msg3(AppMessage::message_type::RESPONSE, EventEnum::timeout);
 			msg3.success = true;
 
-			task_manager.startTransaction(delete_session, msg1);
+			task_manager.startTransaction(TaskType::delete_host, msg1, delete_session);
 			task_manager.processMessage(delete_session, msg2);
 			task_manager.processMessage(delete_session, msg3);
 
@@ -912,7 +749,6 @@ bool BaseManagerTest::test_recombination9(){
 			boost::uniform_int<> real(1, 999);
 			if ((real(gen)%2))
 			{
-				task_manager.allocTransaction(TaskType::delete_host, delete_session);
 				AppMessage msg1(AppMessage::message_type::REQUEST, RequestEnum::delete_host);
 
 				AppMessage msg2(AppMessage::message_type::RESPONSE, RequestEnum::delete_host);
@@ -927,7 +763,7 @@ bool BaseManagerTest::test_recombination9(){
 				AppMessage msg5(AppMessage::message_type::RESPONSE, EventEnum::timeout);
 				msg3.success = true;
 
-				task_manager.startTransaction(delete_session, msg1);
+				task_manager.startTransaction(TaskType::delete_host, msg1, delete_session);
 				task_manager.processMessage(delete_session, msg2);
 				task_manager.processMessage(delete_session, msg3);
 				task_manager.processMessage(delete_session, msg4);
@@ -935,14 +771,13 @@ bool BaseManagerTest::test_recombination9(){
 			}
 			else
 			{
-				task_manager.allocTransaction(TaskType::create_host, create_session);
 				AppMessage msg_create1(AppMessage::message_type::REQUEST, RequestEnum::create_host);
 				AppMessage msg_create2(AppMessage::message_type::RESPONSE, RequestEnum::query_host);
 				AppMessage msg_create3(AppMessage::message_type::EVENT, RequestEnum::join_domain);
 				//AppMessage msg_create4(AppMessage::message_type::EVENT, EventEnum::timeout);
 
 
-				task_manager.startTransaction(create_session, msg_create1);
+				task_manager.startTransaction(TaskType::create_host, msg_create1, create_session);
 				task_manager.processMessage(create_session, msg_create2);
 				//task_manager.processMessage(create_session, msg_create3);
 				//task_manager.processMessage(create_session, msg_create4);

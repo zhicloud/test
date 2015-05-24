@@ -80,6 +80,11 @@
 		<Unit filename="include/service/passive_queue_test.h" />
 		<Unit filename="include/service/service_unify_test.h" />
 		<Unit filename="include/service/timed_invoker_test.h" />
+		<Unit filename="include/service/timer_service_capacity.hpp" />
+		<Unit filename="include/service/timer_service_clear_timer.hpp" />
+		<Unit filename="include/service/timer_service_loop_timer.hpp" />
+		<Unit filename="include/service/timer_service_normal_timer.hpp" />
+		<Unit filename="include/service/timer_service_performance.hpp" />
 		<Unit filename="include/service/timer_service_test.h" />
 		<Unit filename="include/transaction/base_manager_test.h" />
 		<Unit filename="include/transaction/transaction_unify_test.h" />
@@ -101,6 +106,7 @@
 		<Unit filename="src/service/active_queue_test.cpp" />
 		<Unit filename="src/service/event_test.cpp" />
 		<Unit filename="src/service/message_queue_test.cpp" />
+		<Unit filename="src/service/node_service_test.cpp" />
 		<Unit filename="src/service/passive_queue_test.cpp" />
 		<Unit filename="src/service/service_unify_test.cpp" />
 		<Unit filename="src/service/timed_invoker_test.cpp" />
