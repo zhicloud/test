@@ -5,6 +5,7 @@
 #include <list>
 #include <mutex>
 #include <transport/app_message.h>
+#include <service/timer_service.h>
 
 using zhicloud::transport::AppMessage;
 
@@ -20,7 +21,7 @@ namespace zhicloud{
                 typedef uint32_t session_id_type;
                 typedef uint32_t state_type;
                 typedef T task_id_type;
-                typedef int32_t timer_id_type;
+                typedef zhicloud::service::TimerService::timer_id_type timer_id_type;
 
                 BaseSession(const session_id_type& id):session_id(id){
                     reset();
@@ -36,7 +37,7 @@ namespace zhicloud{
                     current_state = (state_type)StateEnum::initial;
                     request_module.clear();
                     request_session = 0;
-                    timer_id = getInvalidTimer();
+                    timer_id = zhicloud::service::TimerService::getInvalidTimer();
                     state_specified = false;
                     _loop_timer = false;
                     _allocated = false;
@@ -96,9 +97,7 @@ namespace zhicloud{
                             current_state = state;
                     }
                 }
-                constexpr static timer_id_type getInvalidTimer(){
-                	return 0;
-                }
+
                 void setTimerID(const timer_id_type& id, const bool& loop = false){
                     timer_id = id;
                     _loop_timer = loop;
@@ -107,7 +106,7 @@ namespace zhicloud{
                     return timer_id;
                 }
                 bool isTimerSetted() const{
-                    return (timer_id != getInvalidTimer());
+                    return (timer_id != zhicloud::service::TimerService::getInvalidTimer());
                 }
 
                 const bool& isLoopTimer() const{
@@ -115,7 +114,7 @@ namespace zhicloud{
                 }
                 void resetTimer(){
                     _loop_timer = false;
-                    timer_id = getInvalidTimer();
+                    timer_id = zhicloud::service::TimerService::getInvalidTimer();
                 }
 
                 const task_id_type& getTaskID() const{

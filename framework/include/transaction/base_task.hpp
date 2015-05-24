@@ -72,7 +72,7 @@ namespace zhicloud{
                     return;
                 }
                 if((AppMessage::message_type::EVENT == msg.type)&&((uint32_t)EventEnum::timeout == msg.id)){
-                    if(msg.sequence != (uint32_t)session.getTimerID()){
+                    if(msg.sequence != session.getTimerID()){
                         logger->warn(boost::format("[%08X]ignore timeout event with timer id %d(current %d)")
                                      %session.getSessionID() %msg.sequence %session.getTimerID());
                         return;
