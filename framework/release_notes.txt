@@ -1,4 +1,15 @@
 ******************************************************
+版本号：2.0#201505026-1
+
+主要变更：
+1、transport::Whisper增加设置监听ip方法transport::Whisper::ip()，以保持与原工作模式兼容
+2、修正service::NodeService在DS断开重连时，无法正确获取DataServer服务端口的问题
+3、service::NodeService收到join domain response或者service update消息时，不再尝试与自己进行连接
+
+兼容性说明：
+无
+
+******************************************************
 版本号：2.0#201505024-1
 
 主要变更：

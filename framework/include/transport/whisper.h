@@ -27,6 +27,7 @@ namespace zhicloud{
             Whisper(const string& ip, const size_t& channel_count, const string& path, const size_t& work_thread = 2);
             virtual ~Whisper();
             const string& ip() const;
+            void ip(const string& value);
             const uint16_t& control_port() const;
             template <class T >
             void bindObserver(T* observer){
