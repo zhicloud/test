@@ -38,6 +38,10 @@ namespace zhicloud{
                     string data() const;
                     const bool& isFinished() const;
                 private:
+                    CachedStrip(const CachedStrip& other);
+                    CachedStrip& operator=(const CachedStrip& other);
+                    CachedStrip& operator=(CachedStrip&& other);
+                private:
                     uint64_t _position;
                     bool _finished;
                     uint32_t _block_size;

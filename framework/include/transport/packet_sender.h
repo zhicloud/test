@@ -34,7 +34,7 @@ namespace zhicloud{
                 class PacketData{
                     public:
                         PacketData();
-                        PacketData(const string& data, const string& d_ip, const uint16_t& d_port,  const int& socket);
+                        PacketData(const string& data, const string& s_ip, const uint16_t& s_port, const string& d_ip, const uint16_t& d_port,  const int& socket);
                         ~PacketData();
                         PacketData(PacketData&& other);
                         PacketData& operator=(PacketData&& other);
@@ -43,12 +43,16 @@ namespace zhicloud{
                         const string& getData() const;
                         const string& getTargetIP() const;
                         const uint16_t& getTargetPort() const;
+                        const string& getSourceIP() const;
+                        const uint16_t& getSourcePort() const;
                         const int& getSocketID() const;
                     private:
                         std::string data;
                         int socket_id;
                         std::string target_ip;
                         uint16_t target_port;
+                        std::string source_ip;
+                        uint16_t source_port;
                 };
             public:
                 typedef std::string address_type;

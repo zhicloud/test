@@ -19,6 +19,7 @@ namespace zhicloud{
                 typedef WhisperSession::state_type state_type;
                 typedef WhisperRule::rule_handler rule_handler;
                 typedef WhisperRule::ResultEnum result_type;
+                typedef std::chrono::milliseconds duration_type;
                 WhisperTask(const WhisperSession::TaskTypeEnum& task_type, const string& task_name);
                 virtual ~WhisperTask();
                 template < class T >
@@ -57,8 +58,8 @@ namespace zhicloud{
                 vector< uint64_t > getReceivePorts() const;
 
                 bool sendMessage(AppMessage& msg, const string& remote_ip, const uint16_t& remote_port);
-                void setTimer(session_type& session, const uint32_t& timeout);
-                void setLoopTimer(session_type& session, const uint32_t& interval);
+                void setTimer(session_type& session, const duration_type& timeout);
+                void setLoopTimer(session_type& session, const duration_type& interval);
                 void clearTimer(session_type& session);
 
                 bool addState(const string& name, state_type& state);
@@ -81,8 +82,8 @@ namespace zhicloud{
                 progress_event_type onProgress;
                 success_event_type onSuccess;
                 fail_event_type onFail;
-                boost::signals2::signal< timer_id_type (const uint32_t&, const uint64_t&) > function_set_timer;
-                boost::signals2::signal< timer_id_type (const uint32_t&, const uint64_t&) > function_set_loop_timer;
+                boost::signals2::signal< timer_id_type (const duration_type&, const uint64_t&) > function_set_timer;
+                boost::signals2::signal< timer_id_type (const duration_type&, const uint64_t&) > function_set_loop_timer;
                 boost::signals2::signal< bool (const timer_id_type&) > function_clear_timer;
                 boost::signals2::signal< void (vector< uint64_t >&)> function_get_port;
                 boost::signals2::signal< void (AppMessage&, const string&, const uint16_t&) > function_send_message;

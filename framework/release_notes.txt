@@ -1,4 +1,23 @@
 ******************************************************
+版本号：2.0#20150607-1
+
+主要变更：
+1、修正service::NodeService::stop时没有调用onStop()方法，导致继承类onStop方法未正确触发的问题
+2、修正transport::WhisperReceiver无序接收数据片时，输出内容以及处理大小混乱的问题
+3、修正transport::PacketSender当发送缓冲未准备好时，未正确重新尝试发送，导致报文丢失的问题。将socket选择调整到请求线程，提高消息发送部分处理性能
+4、完善transport::PacketReceiver接收逻辑
+5、修正whisper传输时未充分利用多通道传输的问题，传输超时判断延长到30s
+6、规范化service::TimedInvoker接口，触发间隔强制为毫秒级别
+7、规范化service::TimerService，接口调整为以毫秒为单位
+8、根据新接口调整NodeService/Transporter/Whisper相关类
+9、Whisper传输失败时，自动释放任务关联的文件资源
+
+兼容性说明：
+1、规范化service::TimedInvoker接口，触发间隔强制为毫秒级别
+2、规范化service::TimerService，接口调整为以毫秒为单位
+
+
+******************************************************
 版本号：2.0#201505026-1
 
 主要变更：

@@ -24,7 +24,6 @@ namespace zhicloud{
                 const static uint32_t operate_timeout;
                 const static uint32_t check_interval;
                 const static uint32_t max_timeout;
-
         };
     }
 }

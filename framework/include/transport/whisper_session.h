@@ -167,6 +167,13 @@ namespace zhicloud{
                 uint32_t& ack_counter(){
                     return _ack_counter;
                 }
+
+                uint32_t& offset(){
+                    return _offset;
+                }
+                uint32_t& notify_counter(){
+                    return _notify_counter;
+                }
             private:
                 typedef std::lock_guard< std::recursive_mutex > lock_type;
                 bool _allocated;
@@ -197,6 +204,8 @@ namespace zhicloud{
                 WhisperReceiver _receiver;
                 uint32_t _counter;
                 uint32_t _ack_counter;
+                uint32_t _offset;
+                uint32_t _notify_counter;
         };
     }
 }

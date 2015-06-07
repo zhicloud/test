@@ -17,21 +17,21 @@ namespace zhicloud{
         {
             public:
                 typedef uint32_t timer_id_type;
-                typedef uint32_t timeout_type;
+                typedef std::chrono::milliseconds timeout_type;
                 typedef uint32_t session_id_type;
                 typedef list< AppMessage > event_list_type;
                 typedef boost::signals2::signal< void (event_list_type&) > event_type;
                 typedef event_type::slot_type event_handler;
 
-                TimerService(const uint32_t& interval_in_seconds = 1, const size_t& max_timer = 1024);
+                TimerService(const timeout_type& interval_in_milliseconds = timeout_type(1000), const size_t& max_timer = 1024);
                 virtual ~TimerService();
                 void bindHandler(const event_handler& handler);
                 bool start();
                 void stop();
-                timer_id_type setTimer(const timeout_type& seconds, const session_id_type& session_id);
-                timer_id_type setLoopTimer(const timeout_type& interval_seconds, const session_id_type& session_id);
-                timer_id_type setTimedEvent(const AppMessage& event, const timeout_type& seconds);
-                timer_id_type setLoopTimedEvent(const AppMessage& event, const timeout_type& interval_seconds);
+                timer_id_type setTimer(const timeout_type& milliseconds, const session_id_type& session_id);
+                timer_id_type setLoopTimer(const timeout_type& interval_milliseconds, const session_id_type& session_id);
+                timer_id_type setTimedEvent(const AppMessage& event, const timeout_type& milliseconds);
+                timer_id_type setLoopTimedEvent(const AppMessage& event, const timeout_type& interval_milliseconds);
                 bool clearTimer(const timer_id_type& timer_id);
 
                 constexpr static timer_id_type getInvalidTimer(){
@@ -48,8 +48,8 @@ namespace zhicloud{
                     ~TimerCounter();
                     TimerCounter(TimerCounter&& other);
                     void reset();
-                    bool allocate(const timer_id_type& timer_id, const session_id_type& session_id, const timeout_type& seconds, const bool& loop = false);
-                    bool allocate(const timer_id_type& timer_id, const AppMessage& msg, const timeout_type& seconds, const bool& loop = false);
+                    bool allocate(const timer_id_type& timer_id, const session_id_type& session_id, const timeout_type& milliseconds, const bool& loop = false);
+                    bool allocate(const timer_id_type& timer_id, const AppMessage& msg, const timeout_type& milliseconds, const bool& loop = false);
                     const timer_id_type& timer_id() const;
                     const std::chrono::time_point< std::chrono::high_resolution_clock >& timepoint() const;
                     const bool& event_specified() const;

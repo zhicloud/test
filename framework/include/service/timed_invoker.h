@@ -1,6 +1,6 @@
 #ifndef TIMEDINVOKER_H
 #define TIMEDINVOKER_H
-#include <memory>
+
 #include <service/runable.hpp>
 #include <boost/signals2.hpp>
 #include <service/event.hpp>
@@ -14,7 +14,7 @@ namespace zhicloud{
             public:
                 typedef boost::signals2::signal< void () > event_type;
                 typedef event_type::slot_type event_handler;
-                TimedInvoker(const unsigned int& interval_in_milli, const unsigned int& limit = 0);
+                TimedInvoker(const std::chrono::milliseconds& interval_in_milli, const unsigned int& limit = 0);
                 virtual ~TimedInvoker();
                 void bindHandler(const event_handler& handler);
             protected:
