@@ -1,6 +1,15 @@
 
 ********************************
 
+版本号：node_client2.0#20150624-1
+	
+主要变更：
+	1.修复以下bug：
+		<TaskManager>process messge exception in thread 1, session[000003FD],msg 29, exception:'ConfigManager' object has no attribute 'error'
+	2.备份/恢复云主机增加超时时间至60s
+
+********************************
+
 版本号：node_client2.0#20150610-1
 	
 主要变更：
