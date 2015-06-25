@@ -1,4 +1,16 @@
 ﻿******************************************************
+版本号：intelligent_router2.0#20150625-1
+
+主要变更：
+1、增加例外规则管理，包括增加、删除、查询功能
+2、修改加载配置文件时，异常捕捉失败的bug
+
+兼容性说明：
+1、公共库framework util/define.hpp需增加add_rule/remove_rule/query_rule消息定义
+2、需配合control_server2.0#20150619-1及以上版本进行测试
+3、zctool需添加add_rule/remove_rule/query_rule接口
+
+******************************************************
 版本号：intelligent_router2.0#20150615-1
 
 主要变更：
