@@ -1,0 +1,500 @@
+
+********************************
+
+版本号：control_server2.0#20150603-1
+
+主要变更：
+	1.修复bug：日志报错“host 'xxx' have no disk index '2'“的问题。修改为由nc的重写磁盘镜像/备份/恢复备份接口去检测磁盘索引参数的合法性。
+	2.增加重写磁盘镜像/备份/恢复备份接口超时时间到10s
+
+********************************
+
+版本号：control_server2.0#20150520-1
+
+主要变更：
+	1.合入日志保留30天的功能。
+
+********************************
+
+版本号：control_server2.0#20150519-1
+
+主要变更：
+	1.增加接口：云主机重写磁盘镜像
+	2.增加接口：云主机备份
+	3.增加接口：云主机恢复备份
+	4.增加接口：查询云主机备份
+	
+********************************
+
+版本号：control_server2.0#20150509-1
+
+主要变更：
+	1、将一些没有对应云主机的forwarder禁用，采用以下逻辑实现：
+		1）、cs启动的时候将所有的forwarder禁用
+		2）、cs连接上nc的时候，将nc上所有云主机对应的forwarder启用
+	2、修复modify_host接口在将云主机的所有开放端口关闭的时候会导致ir与cs之间的forwarder crc检测失败的bug。
+
+********************************
+
+版本号：control_server2.0#20150508-1
+
+主要变更：
+	1、修改了attach_host接口，当将云主机加入vpc时如果刚好nc没有启动或者出现故障会导致cs里面的云主机的数据出现错误。
+	2、cs增加配置文件/var/zhicloud/config/control_server/control_server.conf，创建云主机时为nc保留给操作系统使用的内存、磁盘等可以在这里修改。
+	3、延长了create_host的timeout的时候为60秒，以减少创建云主机时出现timeout的机率。
+	4、延长判断与其它模块断开连接的时间长度为60秒。
+
+********************************
+
+版本号：control_server2.0#20150507-1
+
+主要变更：
+	1.修复bug：删除正在被监控的云主机，导致监控线程报错，不能主动推送云主机状态数据到请求方。
+	﻿
+********************************
+
+版本号：control_server2.0#20150506-1
+
+主要变更：
+	1、删除vpc时，如果vpc内没有云主机，那么会先删除分配给vpc的公网ip，然后再删除vpc。
+	2、修改network_detach_address接口，如果要删除的公网ip已经分配给了云主机，那么不允许删除该公网ip。
+
+********************************
+
+版本号：control_server2.0#20150503-1
+
+主要变更：
+	1、修复cs跟ir forwarder不一致的bug
+
+********************************
+
+版本号：control_server2.0#20150430-1
+
+主要变更：
+	1、解决以下bug：
+	Traceback (most recent call last):
+	  File"/tmp/control_server/build/control_server/out00-PYZ.pyz/control_service",line 316, in handleEventMessage
+	  File"/tmp/control_server/build/control_server/out00-PYZ.pyz/control_service",line 656, in handleTimeout
+	  File"/tmp/control_server/build/control_server/out00-PYZ.pyz/control_service",line 1008, in handleMonitorTimeout
+	  File"/tmp/control_server/build/control_server/out00-PYZ.pyz/control_service",line 1353, in notifyHostMonitorData
+	AttributeError: 'NoneType' object has no attribute 'uuid'
+	
+********************************
+
+版本号：control_server2.0#20150429-2
+
+主要变更：
+	1、修改query_host的返回数据：返回参数ip的意义修改为 [宿主机ip, 公网ip或vpc ip]
+	2、修复bug：当云主机既没有公网ip也没有vpc ip时，query_host_info返回参数ip为[宿主机ip,""],返回参数port为[宿主机端口，""]
+
+********************************
+
+版本号：control_server2.0#20150429-1
+
+主要变更：
+	1、attach_host增加返回数据：返回云主机加入vpc之后分配的vpc ip
+	2、query_network_host增加返回数据：返回云主机的vpc ip
+	3、修改query_host_info的返回数据：返回参数ip的意义修改为 [宿主机ip, 公网ip或vpc ip]
+
+********************************
+
+版本号：control_server2.0#20150427-1
+
+主要变更：
+	1、修复创建云主机时在内存分配算法和磁盘分配算法不准确的bug。
+	2、为云主机增加'是否允许本地备份'和'是否允许扩展usb'属性。
+
+********************************
+
+版本号：control_server2.0#20150424-1
+
+主要变更：
+	1、修复创建云主机时为云主机分配内存的算法计算不准确的bug。
+
+********************************
+
+版本号：control_server2.0#20150423-1
+
+主要变更：
+	1、创建计算资源池时，增加检测地址资源池或端口资源池（即network参数）的有效性
+	2、删除地址资源池时，增加校验资源池是否在被计算资源池或vpc使用
+	3、删除端口资源池时，增加校验资源池是否被计算资源池使用
+
+********************************
+
+版本号：control_server2.0#20150422-1
+
+主要变更：
+	1、修复ir后台不断报：ValueError: invalid literal for int() with base 10: '' 的bug。
+	2、修复在云主机创建不成功的时候forwarder没有清除的bug。
+
+********************************
+
+版本号：control_server2.0#20150421-1
+
+主要变更：
+	1、修复：TypeError: not all arguments converted during string formatting
+
+********************************
+
+版本号：control_server2.0#20150420-1
+
+主要变更：
+	1、修复vpc模式的云主机访问外网时没有snat成对应的公网ip的bug。
+
+********************************
+
+版本号：control_server2.0#20150416-1
+
+主要变更：
+	1、调整了cs、nc、ir之间内部通信的接口
+	2、nc的配置文件host.conf内针对host的属性network和vpc_network合并为一个属性network
+
+********************************
+
+版本号：control_server2.0#20150415-1
+
+主要变更：
+	1、实现了vpc的所有功能
+
+********************************
+
+版本号：control_server2.0#20150302-1
+
+主要变更：
+	1、修复port_resource的allocate方法在分配端口时有时会出现分配结果不正常的bug。
+	2、修复以下bug：
+		2015-03-02 10:19:23,905 [ERROR] <ControlService>handle event exception, event 19[00000004], sender 'control_server_60eb69ed9722', messasge:("'HostForwarder' object has no attribute 'server_port'",)
+			Traceback (most recent call last):
+			  File "/home/zhicloud/src/control_server/build/control_server/out00-PYZ.pyz/control_service", line 317, in handleEventMessage
+			  File "/home/zhicloud/src/control_server/build/control_server/out00-PYZ.pyz/control_service", line 620, in handleTimeout
+			  File "/home/zhicloud/src/control_server/build/control_server/out00-PYZ.pyz/control_service", line 631, in handleSynchronizeTimeout
+			  File "/home/zhicloud/src/control_server/build/control_server/out00-PYZ.pyz/control_service", line 636, in synchronizeData
+			  File "/home/zhicloud/src/control_server/build/control_server/out00-PYZ.pyz/forwarder_manager", line 60, in save
+			AttributeError: 'HostForwarder' object has no attribute 'server_port'
+	
+********************************
+
+版本号：control_server2.0#20150206-1
+
+主要变更：
+	1、修复deallocate public port时，没有将释放的端口保存进文件的bug，该bug会导致一些公网端口一直无法被释放。
+	2、修复创建云主机时申请的公网端口多出一倍的bug，该bug会导致多申请出的公网端口一直无法释放。
+	
+********************************
+
+版本号：control_server2.0#20150205-1
+
+主要变更：
+	1、修复云主机删除时公网端口没有收回的bug。
+	2、修复同一个公网端口被重复使用的bug。
+	3、修复forwarder的output_port_range为空时，signature计算报错的问题
+	
+********************************
+
+版本号：control_server2.0#20150204-1
+
+主要变更：
+	1、修复后台不断报resume 1 port(s) with public ip '1.1.1.96' into address pool 'c8bce8010d934d60a03bedf8fa42e4e6'的bug。
+	
+********************************
+
+版本号：control_server2.0#20150202-1
+
+主要变更：
+	1、增加云主机端口共享模式的功能。
+	
+********************************
+
+版本号：control_server2.0#20150115-1
+
+主要变更：
+	1、修复后台报AttributeError: 'InitialNodeTask' object has no attribute 'pool_manager'的bug。
+	2、修复云主机的网络类型为shared时修改云主机开放端口不成功的bug。
+	
+********************************
+
+版本号：control_server2.0#20150113-1
+
+主要变更：
+	1、修复add_port_resource接口添加资源不成功的bug。
+	
+********************************
+
+版本号：2.0#20150106-1
+
+主要变更：
+	1、修复add_forwarder接口的报错信息和错误内容不符的bug。
+	
+********************************
+
+版本号：2.0#20150105-1
+
+主要变更：
+	1、修复node client的云主机在全部删除后与control server同步不成功的bug。
+	2、修改server uuid的创建机制，由之前的uuid改为机器所在的mac地址。
+	
+********************************
+
+版本号：2.0#20150104-3
+
+主要变更：
+	1、修复node client的云主机删除之后control server的云主机没有同步删除的bug。
+	
+********************************
+
+版本号：2.0#20150104-2
+
+主要变更：
+	1、修复了在delete device时没有对内存内的记录进行同步的bug。
+	
+********************************
+
+版本号：2.0#20150104-1
+
+主要变更：
+	1、修改了storage_pool_manager的锁机制
+	
+********************************
+
+版本号：2.0#20141230-1
+
+主要变更：
+	1、修复内存的stroage_resource_pool记录没有同步的bug
+	2、修复内存的stroage_resource记录没有同步的bug
+	3、修复内存的device记录没有同步的bug
+	4、修复storage_resource删除不成功的bug
+	5、修复device删除不成功的bug
+	6、修复device修改不成功的bug
+	
+********************************
+
+版本号：2.0#20141229-1
+
+主要变更：
+	1、修复create_storage_pool、delete_storage_pool成功时内存里的storage_pool记录没有同步的bug。
+	
+********************************
+
+版本号：2.0#20141228-1
+
+主要变更：
+	1、实现接口：
+		query_device
+		create_device
+		modify_device
+		delete_device
+	
+********************************
+
+版本号：2.0#20141226-1
+
+主要变更：
+	1、实现接口：
+		query_storage_pool
+		create_storage_pool
+		modify_storage_pool
+		delete_storage_pool
+		query_storage_resource
+		add_storage_resource
+		remove_storage_resource
+	
+******************************************************
+
+版本号：2.0#20141215-1
+
+主要变更：
+	1、增加ext4快速格式化的功能
+	
+******************************************************
+
+版本号：2.0#20141211-1
+
+主要变更：
+	1、修改接口attach_disk，支持对新增的磁盘进行自动格式化（ext3、ntfs）
+	
+******************************************************
+版本号：2.0#20141107-3
+
+主要变更：
+1、增加事务attach_disk/detach_disk，支持动态附加、分离数据磁盘
+2、更新公用代码库2.0#20141028-1，解决重复连接导致会话耗尽的问题
+3、增加start_host/stop_host/delete_host操作超时时间到10s
+4、重构实时同步机制，确保主机、资源池数据一致性，同时减少对日常操作的干扰
+5、重构宿主机、云主机状态同步机制，提升并发处理性能
+6、修正ds重连时，从ds读取服务器信息异常的问题
+7、修正未处理重启云主机请求的问题
+8、initial_node事务向nc查询云主机超时时，不再结束事务，只等待nc断开连接时主动中断
+9、start_observe事务接收nc主机状态超时时，不再结束事务，只等待nc断开连接时主动中断
+10、修正nc重连时，initial_node同步数据时，没有恢复主机关联资源的问题
+11、修正ip/端口资源池分配机制，避免连续分配同一资源，避免特殊情况导致某ip/端口被异常占用时，无法成功创建主机的问题
+12、修正主机转发器包含端口信息时，无法正确保存的问题
+
+兼容性说明：
+1、需要配合node client 2.0#20141107-1及后续版本
+2、需要配合data server 2.0#20140813-1及后续版本
+3、需要配合intelligent router 2.0#20140815-1及后续版本
+
+******************************************************
+版本号：2.0#20141030-1
+
+主要变更：
+1、增加事务attach_disk/detach_disk，支持动态附加、分离数据磁盘
+2、更新公用代码库2.0#20141028-1，解决重复连接导致会话耗尽的问题
+3、增加start_host/stop_host/delete_host操作超时时间到10s
+4、重构实时同步机制，确保主机、资源池数据一致性，同时减少对日常操作的干扰
+5、重构宿主机、云主机状态同步机制，提升并发处理性能
+
+兼容性说明：
+1、需要配合node client 2.0#20141030-1及后续版本
+2、需要配合data server 2.0#20140813-1及后续版本
+3、需要配合intelligent router 2.0#20140815-1及后续版本
+
+******************************************************
+版本号：2.0#20141016-1
+
+主要变更：
+1、query_host时，对于已经归属资源池，但是没有收到状态的云主机，依然返回数据，解决特定情况下创建云主机成功但是查询不到的问题
+2、创建主机超时时限增加到3分钟，避免极端情况下出现超时，但是解压缩时超长时间无响应的问题尚未根本解决，还需要后续优化
+
+兼容性说明：
+1、需要配合node client 2.0#20140819-1及后续版本
+2、需要配合data server 2.0#20140813-1及后续版本
+3、需要配合intelligent router 2.0#20140815-1及后续版本
+
+******************************************************
+版本号：2.0#20141010-1
+
+主要变更：
+1、选择计算资源节点时，增加日志输出
+2、更新公用代码，优化定时器触发处理
+3、更新公用代码，事务处理器增加异常捕捉，屏蔽已失效超时事件
+4、智能网关同步转发器数据时，忽略禁用的转发器
+5、修正nc信息初始化，修复云主机异常，导致nc状态监控未启动，从而无法从资源池创建主机的问题
+6、更新公用代码，修正关联节点断开后无法正确重连的问题
+
+兼容性说明：
+1、需要配合node client 2.0#20140819-1及后续版本
+2、需要配合data server 2.0#20140813-1及后续版本
+3、需要配合intelligent router 2.0#20141010-1及后续版本
+
+******************************************************
+版本号：2.0#20141007-1
+
+主要变更：
+1、支持主机转发器配置校验与检查
+2、修正独享云主机创建成功后，成功消息没有正确携带云主机信息的问题
+
+兼容性说明：
+1、需要配合node client 2.0#20140819-1及后续版本
+2、需要配合data server 2.0#20140813-1及后续版本
+3、需要配合intelligent router 2.0#20140815-1及后续版本
+
+******************************************************
+版本号：2.0#20141004-1
+
+主要变更：
+1、创建云主机过程中持续通知创建进度，间隔时间2s，彻底解决后台创建时间较长，导致前端失败的问题
+2、更新事务管理器，升级为并发处理
+
+兼容性说明：
+1、需要配合node client 2.0#20140819-1及后续版本
+2、需要配合data server 2.0#20140813-1及后续版本
+3、需要配合intelligent router 2.0#20140815-1及后续版本
+
+******************************************************
+版本号：2.0#20140929-1
+主要变更：
+1、修复云主机数据时，同步地址资源池和端口资源池
+2、支持重启云主机
+3、定期状态检测发现新主机时，自动尝试修复来源node_client上的云主机数据
+4、创建主机超时检测放宽到10s
+
+兼容性说明：
+1、需要配合node client 2.0#20140819-1及后续版本
+2、需要配合data server 2.0#20140813-1及后续版本
+3、需要配合intelligent router 2.0#20140815-1及后续版本
+
+******************************************************
+版本号：2.0#20140911-1
+
+主要变更：
+1、调整统计状态监控消息处理，使用新接口格式
+
+兼容性说明：
+1、需要配合node client 2.0#20140819-1及后续版本
+2、需要配合data server 2.0#20140813-1及后续版本
+3、需要配合intelligent router 2.0#20140815-1及后续版本
+
+******************************************************
+版本号：2.0#20140819-1
+
+主要变更：
+1、修正query_host_info，云主机uuid不存在时，打印日志异常的错误
+2、修改主机modify_host请求增加name参数修改云主机名，修正修改主机异常的问题
+
+兼容性说明：
+1、需要配合node client 2.0#20140819-1及后续版本
+2、需要配合data server 2.0#20140813-1及后续版本
+3、需要配合intelligent router 2.0#20140815-1及后续版本
+
+******************************************************
+版本号：2.0#20140815-1
+
+主要变更：
+1、记录云主机转发器信息
+2、根据新接口文档调整消息请求initial_node/query_host_info的处理
+3、新增消息add_forwarder/remove_forwarder
+4、实现地址池的分配与释放
+5、create_host/delete_host/modify_host支持地址资源和转发器管理
+6、禁止删除还包含资源节点的计算资源池，避免误操作
+
+兼容性说明：
+1、需要配合node client 2.0#20140815-1及后续版本
+2、需要配合data server 2.0#20140813-1及后续版本
+3、需要配合intelligent router 2.0#20140815-1及后续版本
+
+******************************************************
+版本号：2.0#20140801-1
+
+主要变更：
+1、支持智能路由相关的set_forwarder_status、query_forwarder_summary、query_forwarder、get_forwarder、check_config功能
+2、增加主机资源池、存储资源池修改功能
+3、主机记录关联的计算、存储、网络资源
+4、支持多主机资源池
+5、实现地址资源池查询、创建、删除、添加资源、移除资源、查询资源
+6、计算资源池自动清理无效资源池目录
+7、增加资源池定时同步机制
+8、修正无法正确获取云主机状态的问题
+9、更换20140801版本共享库，调整配置数据、日志等文件存放位置
+10、云主机监控、服务器监控、计算节点监控通知消息，加入status参数，通知当前状态
+
+兼容性说明：
+1、配置、日志、运行文件目录统一调整：
+/var/zhicloud 根目录
+/var/zhicloud/log 模块日志
+/var/zhicloud/config 模块配置，以模块名划分子目录
+/var/zhicloud/running 模块运行pid及运行信息存放
+/var/zhicloud/tmp 临时文件、数据存放目录
+
+******************************************************
+版本号：2.0#20140722-1
+
+主要变更：
+1、修正create_host事务，在stCreateHost状态时，未处理create_host fail事件的问题
+2、修正query_host_info事务查询异常的问题
+
+兼容性说明：
+无
+
+******************************************************
+版本号：2.0#20140719-1
+
+主要变更：
+1、初始化资源节点时，尝试修复遗漏的资源池所属主机信息，解决node_client成功创建主机时，control_server超时，导致主机无法查询和管理的问题
+2、创建主机、磁盘镜像时，增加创建过程中容忍的超时次数，降低由于创建过程中，大量网络流量干扰控制消息，导致创建超时的问题，提高创建成功率
+3、支持查询主机信息请求：query_host_info
+
+兼容性说明：
+无
+
