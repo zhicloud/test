@@ -1,4 +1,47 @@
-﻿---------------------------------
+﻿版本：V1.20
+日期：2015/7/09
+修改人：童孟丽
+
+修改内容：
+1、新增接口创建VPC create_network
+2、新增接口修改VPC modify_network
+3、新增接口查询VPC query_network
+4、新增接口查询VPC详情 query_network_detail
+5、新增接口启动VPC start_network
+6、新增接口停用VPC stop_network
+7、新增接口删除VPC delete_network
+8、新增接口查询关联云主机 query_network_host
+9、新增接口关联云主机 attach_host
+10、新增接口移除云主机 detach_host
+11、新增接口申请增加公网IP  network_attach_address
+12、新增接口申请减少公网IP network_detach_address
+13、新增接口绑定端口 network_bind_port
+14、新增接口解除绑定端口 network_unbind_port
+15、修改接口modify_compute_pool 增加接口option是否强制修改资源池
+﻿﻿---------------------------------
+
+版本：V1.19
+日期：2015/6/27
+修改人：童孟丽
+
+修改内容：
+1、新增接口查询例外规则query_rule
+2、新增接口增加例外规则add_rule
+3、新增接口删除例外规则remove_rule
+﻿﻿---------------------------------
+版本：V1.18
+日期：2015/6/03
+修改人：童孟丽
+
+修改内容：
+1、修改了exit退出报错
+2、创建云主机新增参数是否本地备份-bk 和是否支持usb -usb
+3、修改云主机新增参数是否支持本地备份 -bk 和是否支持usb -usb
+4、新增接口重写磁盘镜像flush_disk_image
+5、新增接口备份云主机backup_host
+6、新增接口恢复主机resume_host
+7、新增接口查询备份query_host_backup
+---------------------------------
 版本：V1.17
 日期：2015/5/26
 修改人：蒋捷
