@@ -1,6 +1,15 @@
 
 ********************************
 
+版本号：control_server2.0#20150720-1
+
+主要变更：
+	1.修复以下bug：
+	在私有云模式下，将云主机加入vpc，报以下错误：
+	<attach_host> attach host fail, forwarder not found
+
+********************************
+
 版本号：control_server2.0#20150716-1
 
 主要变更：
