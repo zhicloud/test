@@ -4,6 +4,9 @@
 主要变更：
 	1.修复以下bug：create_host接口port参数传入空数组时，程序报错-不能转换为int类型。
 	2.修正获取整型数组及浮点数组时，首先检测获取到的字符串是否可转换为对应基本数据类型。
+	3.修改modify_network接口，增加公网ip迁移功能
+	4.增加modify_compute_pool接口，暂不对web端开放。
+	5.修正network_unbind_port接口（原cs接口文档有无，导致gw此接口获取返回参数错误）
 
 兼容性说明：
 	1.云管理平台2.0
