@@ -1,5 +1,12 @@
 ********************************
 
+版本号：control_server2.0#20150724-1
+
+主要变更：
+	1.增加统计服务功能：query_operate_detail，query_operate_summary，query_service_detail，query_service_summary。
+
+********************************
+
 版本号：control_server2.0#20150722-1
 
 主要变更：
