@@ -22,6 +22,9 @@ namespace zhicloud{
             storage_portal = 12,
             storage_object = 13,
             intelligent_router = 14,
+            iscsi_gateway = 15,
+            storage_file = 16,
+            service_guardian = 17,
         };
         enum class RequestEnum: uint32_t{
             invalid = 0,
@@ -329,6 +332,31 @@ namespace zhicloud{
             delete_snapshot = 198,
             resume_snapshot = 199,
             synchronize_page = 200,
+            modify_snapshot_pool = 201,
+            query_snapshot_node = 202,
+
+//				    """
+//				    network
+//				    """
+            query_network_detail = 210,
+
+            query_network_host = 220,
+            attach_host        = 221,
+            detach_host        = 222,
+
+            network_attach_address = 230,
+            network_detach_address = 231,
+
+            network_bind_port       = 240,
+            network_unbind_port     = 241,
+
+//				    '''
+//				    host
+//				    '''
+            flush_disk_image = 250,
+            backup_host = 251,
+            resume_host = 252,
+            query_host_backup = 253,
         };
         enum class EventEnum: uint32_t
         {
