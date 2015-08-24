@@ -114,6 +114,7 @@ namespace zhicloud{
                 void onConnectRequest(AppMessage& msg, const string& sender);
                 void onDisconnectResponse(AppMessage& msg, const string& sender);
                 void onDisconnectRequest(AppMessage& msg, const string& sender);
+                void disonnectAllEndpoint();
                 config_event_type onServiceModified;
                 config_event_type onServerModified;
 
