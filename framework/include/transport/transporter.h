@@ -52,9 +52,10 @@ namespace zhicloud{
                 void bindConnectedHandler(const connection_event_handler& handler);
                 void bindDisconnectedHandler(const connection_event_handler& handler);
                 void bindMessageHandler(const message_event_handler& handler);
-                bool tryConnect(const string& remote_name, const string& ip, const port_type& port);
+                bool tryConnect(const string& remote_name, const string& ip, const port_type& port, session_id_type& session_id);
                 bool tryDisconnect(const session_id_type& session_id);
                 void disconnectAll();
+                bool releaseSession(const session_id_type& session_id);
             protected:
                 virtual bool onStart();
                 virtual void onStopping();

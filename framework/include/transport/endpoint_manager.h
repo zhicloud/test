@@ -23,6 +23,7 @@ namespace zhicloud{
                 virtual ~EndpointManager();
                 void allocate(const string& remote_name, session_id_type& output);
                 void deallocate(const session_id_type& id);
+                bool isAllocated(const string& remote_name, session_id_type& output);
                 bool checkTimeout(list<session_id_type>& timeout_list);
                 list<session_id_type> getAllConnected();
 
