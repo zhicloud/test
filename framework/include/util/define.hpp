@@ -357,6 +357,34 @@ namespace zhicloud{
             backup_host = 251,
             resume_host = 252,
             query_host_backup = 253,
+
+            //add by akumas, 2015/08/24
+            reset_host = 254,
+            migrate_host = 255,
+            fetch_host = 256,
+            save_host = 257,
+            restore_host = 258,
+
+            add_rule = 260,
+            remove_rule = 261,
+            query_rule = 262,
+
+            //forwarder group
+            query_forwarder_group = 263,
+            create_forwarder_group = 264,
+            delete_forwarder_group = 265,
+            create_forwarder = 266,
+            delete_forwarder = 267,
+            attach_forwarder = 268,
+            detach_forwarder = 269,
+
+            query_compute_pool_detail = 270,
+            enable_service = 271,
+            disable_service = 272,
+
+            query_server_device = 273,
+            add_server_device = 274,
+            remove_server_device = 275,
         };
         enum class EventEnum: uint32_t
         {
@@ -570,6 +598,7 @@ namespace zhicloud{
             crypt = 157,
             snapshot = 158,
             io = 159,
+            priority = 160,
         };
     }
 }
