@@ -1,4 +1,16 @@
-﻿版本：V1.20
+﻿版本V1.21
+日期：2015/09/06
+修改人：童孟丽
+修改内容：
+1.新增接口reset_host接口
+2.修改接口create_compute_pool 增加参数auto_qos和high_avaliable
+3.修改接口modify_compute_pool 增加参数auto_qos和high_avaliable
+4.新增接口query_operate_detail
+5.新增接口query_operate_summary
+6.新增接口query_service_detail
+7.新增接口query_service_summary
+﻿﻿---------------------------------
+版本：V1.20
 日期：2015/7/09
 修改人：童孟丽
 
