@@ -379,12 +379,38 @@ namespace zhicloud{
             detach_forwarder = 269,
 
             query_compute_pool_detail = 270,
-            enable_service = 271,
-            disable_service = 272,
 
-            query_server_device = 273,
-            add_server_device = 274,
-            remove_server_device = 275,
+            //64 message per function segment
+            //etc:
+            //00 00 00 00 ~ 00 11 11 11
+            //01 00 00 00 ~ 01 11 11 11
+
+            //function:system:01 01 00 00 00/320
+
+            //function:server:01 10 00 00 00/384
+            query_storage_device = 384,
+            add_storage_device = 385,
+            remove_storage_device = 386,
+            enable_storage_device = 387,
+            disable_storage_device = 388,
+            query_network_device = 389,
+            query_bond_group = 390,
+            create_bond_group = 391,
+            modify_bond_group = 392,
+            delete_bond_group = 393,
+            attach_network_device = 394,
+            detach_network_device = 395,
+
+            //function:service:01 11 00 00 00/448
+            enable_service = 448,
+            disable_service = 449,
+
+            //function:pool:10 00 00 00 00/512
+
+            //function:host:10 01 00 00 00/576
+
+            //function:network/forwarder/vpc:10 10 00 00 00/640
+            migrate_forwarder = 640,
         };
         enum class EventEnum: uint32_t
         {
@@ -432,6 +458,7 @@ namespace zhicloud{
             page_stored = 38,
             page_changed = 39,
             terminate = 40,
+            config_changed = 41,
         };
         enum class ParamEnum: uint32_t{
             domain = 0,
