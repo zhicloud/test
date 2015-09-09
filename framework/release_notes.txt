@@ -1,4 +1,17 @@
 ******************************************************
+版本号：2.0#20150909-1
+
+主要变更：
+1、增加event:config_changed
+2、根据功能段划分请求消息，调整消息定义：enable_service、disable_service
+3、新增消息：query_storage_device\add_storage_device\remove_storage_device\enable_storage_device\disable_storage_device\
+query_network_device\query_bond_group\create_bond_group\modify_bond_group\delete_bond_group\attach_network_device\detach_network_device\
+migrate_forwarder
+
+兼容性说明：
+    无
+
+******************************************************
 版本号：2.0#20150829-1
 
 主要变更：
