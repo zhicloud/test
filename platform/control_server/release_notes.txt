@@ -1,4 +1,12 @@
 ********************************
+版本号：control_server2.0#20150917-1
+
+主要变更：
+	1.增加多磁盘相关接口：query_storage_device, add_storage_device,remove_storage_device, enable_storage_device, disable_storage_device
+	2.修正当cs和ir的forwarder数据不一致的时候ir从cs同步数据失败的bug。
+	3.修复当nc关闭的时候，modify_host接口报错的bug
+
+********************************
 版本号：control_server2.0#20150911-1
 
 主要变更：
