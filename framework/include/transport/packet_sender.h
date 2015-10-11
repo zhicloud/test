@@ -70,7 +70,8 @@ namespace zhicloud{
                 virtual void onWaitFinish();
             private:
                 void onPacketAvailable(PacketData& packet, uint64_t& pos, bool end_of_batch);
-                void monitorProcess();
+//                void monitorProcess();
+                void activeSocket(int socket_id);
             private:
                 const static size_t socket_buffer_size = 64;
                 const static size_t packet_buffer_size = 1024;
