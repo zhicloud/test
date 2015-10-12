@@ -1,7 +1,15 @@
 ******************************************************
-版本号：2.0#20150909-1
+版本号：2.0#20151010-1
 
 主要变更：
+1、重构PacketSender逻辑，不再依靠epoll检测可发送socket，而是直接用令牌传递模式，提升处理性能、稳定性，减少资源消耗
+
+兼容性说明：
+    无
+    
+******************************************************
+版本号：2.0#20150909-1
+
 1、增加event:config_changed
 2、根据功能段划分请求消息，调整消息定义：enable_service、disable_service
 3、新增消息：query_storage_device\add_storage_device\remove_storage_device\enable_storage_device\disable_storage_device\
