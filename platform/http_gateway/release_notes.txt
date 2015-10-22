@@ -1,4 +1,18 @@
 *******************************
+版本号：http_gateway2.0#20151020-1
+
+主要变更：
+	1.create_compute_pool接口增加path、crypt参数，以支持共享存储。
+	2.query_compute_pool_detail接口增加path、crypt参数，以支持共享存储。
+	3.modify_compute_pool接口增加path、crypt参数，以支持共享存储。
+	4.增加modify_service接口，以支持共享存储。
+	5.query_service接口增加disk_type参数，以支持共享存储。
+	6.upload_iso_image接口增加disk_type、uuid参数，以支持共享存储。
+
+兼容性说明：
+	1.control_server2.0#20151020-1
+
+*******************************
 版本号：http_gateway2.0#20150917-1
 
 主要变更：
