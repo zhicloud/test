@@ -95,13 +95,18 @@ namespace zhicloud{
             void bindHandler(const event_handler& handler){
                 onEvent.connect(handler);
             }
+
             //copy to queue
-            bool put(const T& t){
+            bool tryPut(const T& t){
                 try{
-                    position_type pos = next();
+//                    BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<ActiveQueue>try put new element...") %std::this_thread::get_id();
+                    position_type pos(0);
+                    if(! tryAllocateSlot(1, pos)){
+                        return false;
+                    }
                     setSlot(pos, t);
                     publishSlot(pos);
-//                    BOOST_LOG_TRIVIAL(info) << boost::format("[%x]element copy to pos %d") %std::this_thread::get_id() %pos;
+//                    BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<ActiveQueue>element copy to pos %d") %std::this_thread::get_id() %pos;
                     return true;
                 }
                 catch(StoppedException& ex){
@@ -109,18 +114,50 @@ namespace zhicloud{
                 }
             }
             //move
-            bool put(T&& t){
+            bool tryPut(T&& t){
                 try{
-                    position_type pos = next();
+//                    BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<ActiveQueue>try move new element...") %std::this_thread::get_id();
+                    position_type pos(0);
+                    if(! tryAllocateSlot(1, pos)){
+                        return false;
+                    }
                     setSlot(pos, std::move(t));
                     publishSlot(pos);
-//                    BOOST_LOG_TRIVIAL(info) << boost::format("[%x]element moved to pos %d") %std::this_thread::get_id() %pos;
+//                    BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<ActiveQueue>element moved to pos %d") %std::this_thread::get_id() %pos;
                     return true;
                 }
                 catch(StoppedException& ex){
                     return false;
                 }
             }
+//            //copy to queue
+//            bool put(const T& t){
+//                try{
+////                    BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<ActiveQueue>try put new element...") %std::this_thread::get_id();
+//                    position_type pos = next();
+//                    setSlot(pos, t);
+//                    publishSlot(pos);
+////                    BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<ActiveQueue>element copy to pos %d") %std::this_thread::get_id() %pos;
+//                    return true;
+//                }
+//                catch(StoppedException& ex){
+//                    return false;
+//                }
+//            }
+//            //move
+//            bool put(T&& t){
+//                try{
+////                    BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<ActiveQueue>try move new element...") %std::this_thread::get_id();
+//                    position_type pos = next();
+//                    setSlot(pos, std::move(t));
+//                    publishSlot(pos);
+////                    BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<ActiveQueue>element moved to pos %d") %std::this_thread::get_id() %pos;
+//                    return true;
+//                }
+//                catch(StoppedException& ex){
+//                    return false;
+//                }
+//            }
             ActiveQueue(const ActiveQueue& other):ring_mask(BufferSize - 1)
             {
                 copy(other);
@@ -133,7 +170,7 @@ namespace zhicloud{
         protected:
             virtual bool onStart(){
                 dispatch_thread = std::thread(&ActiveQueue< T, BufferSize >::dispatchProcess, this);
-//                BOOST_LOG_TRIVIAL(info) << boost::format("dispatch thread[%x]started") %dispatch_thread.get_id();
+//                BOOST_LOG_TRIVIAL(info) << boost::format("<ActiveQueue>dispatch thread[%x]started") %dispatch_thread.get_id();
                 return true;
             }
             virtual void onStopping(){
@@ -141,7 +178,7 @@ namespace zhicloud{
             }
             virtual void onWaitFinish(){
                 dispatch_thread.join();
-//                BOOST_LOG_TRIVIAL(info) << boost::format("dispatch thread[%x]stopped") %dispatch_thread.get_id();
+//                BOOST_LOG_TRIVIAL(info) << boost::format("<ActiveQueue>dispatch thread[%x]stopped") %dispatch_thread.get_id();
             }
 //            virtual void onStopped();
         private:
@@ -161,24 +198,79 @@ namespace zhicloud{
                         warp_pos = next - BufferSize;
                     }
                     position_type cached_gating = gating_position.get();
-//                    BOOST_LOG_TRIVIAL(info) << "next:" << current << ", " << next << "," << warp_pos << "," << cached_gating;
+//                    BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<ActiveQueue>check next %d element, current %d, next %d, warp pos %d,  cached gating %d")
+//                                                                            %std::this_thread::get_id() %quantity %current %next %warp_pos %cached_gating;
+
+
                     if((warp_pos > cached_gating)||(cached_gating > current)){
                         position_type new_gating = std::min(consume_cursor.load(), current);
                         if(warp_pos > new_gating){
                             //need sleep&keep waiting
+//                            BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<ActiveQueue>wait gating change, current %d")
+//                                                        %std::this_thread::get_id() %new_gating;
+
                             nap();
                             continue;
                         }
                         //update new gating
                         gating_position.set(new_gating);
+//                        BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<ActiveQueue>update to new gating %d")
+//                                                        %std::this_thread::get_id() %new_gating;
+
                     }
                     else if(ring_cursor.compare_exchange_strong(current, next))
                     {
                         //set&forward
+//                        BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<ActiveQueue>forward ring cursor to:%d")
+//                                                        %std::this_thread::get_id() %next;
                         break;
                     }
                 }
                 return next;
+            }
+            bool  tryAllocateSlot(const size_t& quantity, position_type& next){
+                if(0 == quantity){
+                    throw std::logic_error("Invalid request quantity");
+                }
+                position_type current;
+                while(true){
+                    current = ring_cursor.load();
+                    next = current + quantity;
+                    position_type warp_pos(0);
+                    if(next > BufferSize){
+                        warp_pos = next - BufferSize;
+                    }
+                    position_type cached_gating = gating_position.get();
+//                    BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<ActiveQueue>check next %d element, current %d, next %d, warp pos %d,  cached gating %d")
+//                                                                            %std::this_thread::get_id() %quantity %current %next %warp_pos %cached_gating;
+
+
+                    if((warp_pos > cached_gating)||(cached_gating > current)){
+                        position_type new_gating = std::min(consume_cursor.load(), current);
+                        if(warp_pos > new_gating){
+                            //need sleep&keep waiting
+//                            BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<ActiveQueue>wait gating change, current %d")
+//                                                        %std::this_thread::get_id() %new_gating;
+
+                            //no slot available
+                            return false;
+                        }
+                        //update new gating
+                        gating_position.set(new_gating);
+//                        BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<ActiveQueue>update to new gating %d")
+//                                                        %std::this_thread::get_id() %new_gating;
+
+                    }
+                    if(ring_cursor.compare_exchange_strong(current, next))
+                    {
+                        //set&forward
+//                        BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<ActiveQueue>forward ring cursor to:%d")
+//                                                        %std::this_thread::get_id() %next;
+                        return true;
+                    }
+                    //try again
+                }
+                return false;
             }
             //nap for a while
             void nap(){
@@ -313,15 +405,23 @@ namespace zhicloud{
                     try{
                         //single thread only
                         //todo:support multithread consumer
+//                        BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<ActiveQueue>wait published for slot %d")
+//                                                        %std::this_thread::get_id() %next_pos;
                         const position_type available_pos = waitPublishedSlot(next_pos);
+//                        BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<ActiveQueue>slot %d available")
+//                                                        %std::this_thread::get_id() %available_pos;
                         while(next_pos <= available_pos){
                             //copy event
                             event = getSlot(next_pos);
                             onEvent(event, next_pos, next_pos == available_pos);
+//                            BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<ActiveQueue>slot %d proccessed")
+//                                                        %std::this_thread::get_id() %next_pos;
                             next_pos++;
                         }
                         //forward consumer
                         consume_cursor.store(available_pos);
+//                        BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<ActiveQueue>forward consume cursor to %d")
+//                                                        %std::this_thread::get_id() %available_pos;
                     }
                     catch(StoppedException& ex){
                         //stopped

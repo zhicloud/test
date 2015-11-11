@@ -149,7 +149,7 @@ namespace zhicloud{
                 map< queue_index_type,  zhicloud::service::ActiveQueue < AppMessage, queue_size > >::iterator ir =  _queue_map.find(index);
                 if(_queue_map.end() == ir)
                     return false;
-                return ir->second.put(msg);
+                return ir->second.tryPut(msg);
             }
             void deallocTransaction(const session_id_type& session_id){
                 if(!isValid(session_id))

@@ -8,6 +8,10 @@
 #include <mutex>
 #include <condition_variable>
 
+//debug
+//#include <boost/log/trivial.hpp>
+//#include <boost/format.hpp>
+
 namespace zhicloud{
     namespace service{
 
@@ -77,17 +81,37 @@ namespace zhicloud{
             ~PassiveQueue(){
             }
             //copy to queue
-            void put(const T& t){
+            bool tryPut(const T& t){
                 try{
-                    position_type pos = next();
+//                    BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<PassiveQueue>try put new element...") %std::this_thread::get_id();
+                    position_type pos(0);
+                    if(! tryAllocateSlot(1, pos)){
+                        return false;
+                    }
                     setSlot(pos, t);
                     publishSlot(pos);
+//                    BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<PassiveQueue>element copy to pos %d") %std::this_thread::get_id() %pos;
+                    return true;
                 }
                 catch(InvalidateException& ex){
-                    return;
+                    return false;
                 }
 
             }
+//            //copy to queue
+//            void put(const T& t){
+//                try{
+////                    BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<PassiveQueue>try put new element...") %std::this_thread::get_id();
+//                    position_type pos = next();
+//                    setSlot(pos, t);
+//                    publishSlot(pos);
+////                    BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<PassiveQueue>element copy to pos %d") %std::this_thread::get_id() %pos;
+//                }
+//                catch(InvalidateException& ex){
+//                    return;
+//                }
+//
+//            }
             bool get(T& t){
                 try{
                     //supprt multithread consumer
@@ -95,9 +119,13 @@ namespace zhicloud{
                     do{
                         current_pos = consume_cursor.load();
                         next_pos = current_pos + 1;
+//                        BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<PassiveQueue>wait published for slot %d")
+//                                                        %std::this_thread::get_id() %next_pos;
                         waitPublishedSlot(next_pos);
                         //cache event
                         t = getSlot(next_pos);
+//                        BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<PassiveQueue>slot %d available")
+//                                                        %std::this_thread::get_id() %next_pos;
                         //forward cursor
                     }while(!consume_cursor.compare_exchange_strong(current_pos, next_pos));
                     //forward success
@@ -128,24 +156,75 @@ namespace zhicloud{
                         warp_pos = next - BufferSize;
                     }
                     position_type cached_gating = gating_position.get();
-//                    BOOST_LOG_TRIVIAL(info) << "next:" << current << ", " << next << "," << warp_pos << "," << cached_gating;
+//                    BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<PassiveQueue>check next %d element, current %d, next %d, warp pos %d,  cached gating %d")
+//                                                                        %std::this_thread::get_id() %quantity %current %next %warp_pos %cached_gating;
                     if((warp_pos > cached_gating)||(cached_gating > current)){
                         position_type new_gating = std::min(consume_cursor.load(), current);
                         if(warp_pos > new_gating){
                             //need sleep&keep waiting
+//                            BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<PassiveQueue>wait gating change, current %d")
+//                                                        %std::this_thread::get_id() %new_gating;
                             nap();
                             continue;
                         }
                         //update new gating
                         gating_position.set(new_gating);
+//                        BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<PassiveQueue>update to new gating %d")
+//                                                        %std::this_thread::get_id() %new_gating;
                     }
                     else if(ring_cursor.compare_exchange_strong(current, next))
                     {
                         //set&forward
+//                        BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<PassiveQueue>forward ring cursor to:%d")
+//                                                        %std::this_thread::get_id() %next;
                         break;
                     }
                 }
                 return next;
+            }
+           bool  tryAllocateSlot(const size_t& quantity, position_type& next){
+                if(0 == quantity){
+                    throw std::logic_error("Invalid request quantity");
+                }
+                position_type current;
+                while(true){
+                    current = ring_cursor.load();
+                    next = current + quantity;
+                    position_type warp_pos(0);
+                    if(next > BufferSize){
+                        warp_pos = next - BufferSize;
+                    }
+                    position_type cached_gating = gating_position.get();
+//                    BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<ActiveQueue>check next %d element, current %d, next %d, warp pos %d,  cached gating %d")
+//                                                                            %std::this_thread::get_id() %quantity %current %next %warp_pos %cached_gating;
+
+
+                    if((warp_pos > cached_gating)||(cached_gating > current)){
+                        position_type new_gating = std::min(consume_cursor.load(), current);
+                        if(warp_pos > new_gating){
+                            //need sleep&keep waiting
+//                            BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<ActiveQueue>wait gating change, current %d")
+//                                                        %std::this_thread::get_id() %new_gating;
+
+                            //no slot available
+                            return false;
+                        }
+                        //update new gating
+                        gating_position.set(new_gating);
+//                        BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<ActiveQueue>update to new gating %d")
+//                                                        %std::this_thread::get_id() %new_gating;
+
+                    }
+                    if(ring_cursor.compare_exchange_strong(current, next))
+                    {
+                        //set&forward
+//                        BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<ActiveQueue>forward ring cursor to:%d")
+//                                                        %std::this_thread::get_id() %next;
+                        return true;
+                    }
+                    //try again
+                }
+                return false;
             }
             //nap for a while
             void nap(){
