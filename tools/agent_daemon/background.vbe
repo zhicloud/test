@@ -1,0 +1,2 @@
+set ws=wscript.createobject("wscript.shell")
+ws.run "agent_daemon.bat /start",0
