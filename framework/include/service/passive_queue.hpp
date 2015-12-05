@@ -98,20 +98,20 @@ namespace zhicloud{
                 }
 
             }
-//            //copy to queue
-//            void put(const T& t){
-//                try{
-////                    BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<PassiveQueue>try put new element...") %std::this_thread::get_id();
-//                    position_type pos = next();
-//                    setSlot(pos, t);
-//                    publishSlot(pos);
+           //copy to queue
+            void put(const T& t){
+                try{
+//                    BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<PassiveQueue>try put new element...") %std::this_thread::get_id();
+                    position_type pos = next();
+                    setSlot(pos, t);
+                    publishSlot(pos);
 ////                    BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<PassiveQueue>element copy to pos %d") %std::this_thread::get_id() %pos;
-//                }
-//                catch(InvalidateException& ex){
-//                    return;
-//                }
-//
-//            }
+                }
+                catch(InvalidateException& ex){
+                    return;
+                }
+
+            }
             bool get(T& t){
                 try{
                     //supprt multithread consumer
