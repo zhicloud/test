@@ -6,6 +6,7 @@
 #include <util/file_appender.h>
 #include <unordered_map>
 #include <thread>
+#include <mutex>
 #include <service/passive_queue.hpp>
 
 namespace zhicloud {
@@ -14,7 +15,8 @@ namespace util {
 class LoggerManager : public Singleton<LoggerManager>, public EventHandler
 {
 public:
-    bool initialLogging(bool create_async_thread = false);
+
+    bool initialLogging();
     bool finishLogging();
     bool setCollector(const std::string& path, const uint64_t& max_size);
     logger_type getLogger(const std::string& name, const log_level& level = level_info);
@@ -34,6 +36,7 @@ public:
 
 
 private:
+
     bool addFileAppender(const Appender::WORK_MODE& workmode,
                          const std::string &appender_name,
                          const std::string& work_path,
@@ -54,7 +57,9 @@ private:
     std::unordered_map<std::string, uint64_t> m_collector_infos;
     zhicloud::service::PassiveQueue<ASYNC_EVENT_TYPE, 8192> m_async_events;
     std::thread m_async_thread;
-    bool _has_async_thread;
+    std::atomic<bool> _has_async_thread;
+    typedef std::unique_lock<std::recursive_mutex> lock_type;
+    mutable std::recursive_mutex _mutex;
 };
 
 }
