@@ -130,34 +130,34 @@ namespace zhicloud{
                     return false;
                 }
             }
-//            //copy to queue
-//            bool put(const T& t){
-//                try{
-////                    BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<ActiveQueue>try put new element...") %std::this_thread::get_id();
-//                    position_type pos = next();
-//                    setSlot(pos, t);
-//                    publishSlot(pos);
-////                    BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<ActiveQueue>element copy to pos %d") %std::this_thread::get_id() %pos;
-//                    return true;
-//                }
-//                catch(StoppedException& ex){
-//                    return false;
-//                }
-//            }
-//            //move
-//            bool put(T&& t){
-//                try{
-////                    BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<ActiveQueue>try move new element...") %std::this_thread::get_id();
-//                    position_type pos = next();
-//                    setSlot(pos, std::move(t));
-//                    publishSlot(pos);
-////                    BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<ActiveQueue>element moved to pos %d") %std::this_thread::get_id() %pos;
-//                    return true;
-//                }
-//                catch(StoppedException& ex){
-//                    return false;
-//                }
-//            }
+            //copy to queue
+            bool put(const T& t){
+                try{
+//                    BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<ActiveQueue>try put new element...") %std::this_thread::get_id();
+                    position_type pos = next();
+                   setSlot(pos, t);
+                    publishSlot(pos);
+//                    BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<ActiveQueue>element copy to pos %d") %std::this_thread::get_id() %pos;
+                    return true;
+                }
+                catch(StoppedException& ex){
+                    return false;
+                }
+            }
+            //move
+            bool put(T&& t){
+                try{
+//                    BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<ActiveQueue>try move new element...") %std::this_thread::get_id();
+                    position_type pos = next();
+                    setSlot(pos, std::move(t));
+                    publishSlot(pos);
+//                    BOOST_LOG_TRIVIAL(info) << boost::format("[%x]<ActiveQueue>element moved to pos %d") %std::this_thread::get_id() %pos;
+                    return true;
+                }
+               catch(StoppedException& ex){
+                    return false;
+                }
+            }
             ActiveQueue(const ActiveQueue& other):ring_mask(BufferSize - 1)
             {
                 copy(other);

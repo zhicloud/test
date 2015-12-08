@@ -38,7 +38,7 @@ namespace zhicloud{
                 virtual ~WhisperSender();
                 void reset();
                 void initial(const string& filename, const uint32_t& block_size, const uint32_t& strip_length, const uint32_t& cache_count);
-                void complete(const uint64_t& strip_id, const uint64_t& block_id);
+                bool complete(const uint64_t& strip_id, const uint64_t& block_id);
                 bool isFinished() const;
                 void fetchData(const size_t& max_process, list< DataBlock >& block_list);
                 void fetchFailedData(const uint32_t& cache_index, list< DataBlock >& block_list);
