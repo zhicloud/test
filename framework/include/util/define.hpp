@@ -404,6 +404,7 @@ namespace zhicloud{
             //function:service:01 11 00 00 00/448
             enable_service = 448,
             disable_service = 449,
+            query_image_service = 450,
 
             //function:pool:10 00 00 00 00/512
 
@@ -459,6 +460,8 @@ namespace zhicloud{
             page_changed = 39,
             terminate = 40,
             config_changed = 41,
+            iso_image_created = 42,
+            disk_image_created = 43,
         };
         enum class ParamEnum: uint32_t{
             domain = 0,
