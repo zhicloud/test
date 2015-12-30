@@ -2,6 +2,7 @@
 #define DOMAINUTILITY_H
 
 #include <string>
+#include <random>
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <boost/signals2.hpp>
@@ -67,6 +68,7 @@ namespace zhicloud{
                 udp::socket socket;
                 udp::endpoint remote_endpoint;
                 udp::endpoint group_endpoint;
+				default_random_engine generator;
         };
     }
 }

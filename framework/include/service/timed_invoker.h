@@ -4,6 +4,7 @@
 #include <service/runable.hpp>
 #include <boost/signals2.hpp>
 #include <service/event.hpp>
+#include <util/logging.h>
 #include <thread>
 #include <chrono>
 
@@ -33,6 +34,7 @@ namespace zhicloud{
                 std::thread notify_thread;
                 std::thread invoke_thread;
                 Event timeout_event;
+                util::logger_type logger;
         };
 
     }
