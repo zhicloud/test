@@ -1,4 +1,14 @@
-﻿******************************************************
+******************************************************
+版本号：intelligent_router2.0#20151214-1
+
+主要变更：
+1、将framework替换为2.0#20151209-1版本
+2、添加string 头文件声明std命名空间
+
+兼容性说明：
+无
+
+******************************************************
 版本号：intelligent_router2.0#20151102-1
 
 主要变更：
@@ -29,7 +39,7 @@
 版本号：intelligent_router2.0#20150917-1
 
 主要变更：
-1、修正当cs和ir的forwarder数据不一到的时候ir从cs同步数据失败的bug
+1、修正当cs和ir的forwarder数据不一到的时候ir从cs同步数据失败的bug。
 
 兼容性说明：
 cs: need > control_server2.0#20150911-1
@@ -60,6 +70,15 @@ cs: need > control_server2.0#20150911-1
 
 主要变更：
 1、修正add_forwarder接口中，当参数ip的列表长度为1时，因数组越界导致程序挂掉的bug
+
+兼容性说明：
+无
+
+******************************************************
+版本号：intelligent_router2.0#20150703-1
+
+主要变更：
+1、消除add_rule/remove_rule接口中的魔数，增加rule mode的常量定义
 
 兼容性说明：
 无
@@ -135,13 +154,6 @@ cs: need > control_server2.0#20150911-1
 
 ********************************
 
-版本号：intelligent_router2.0#20150424-1
-
-主要变更：
-	1、修复ir启动时iptables会被刷新两次的且第一个刷新失败的bug。
-
-********************************
-
 版本号：intelligent_router2.0#20150422-1
 
 主要变更：
@@ -172,10 +184,17 @@ cs: need > control_server2.0#20150911-1
 	
 ********************************
 
-版本号：intelligent_router2.0#20150415-1
+版本号：intelligent_router2.0#20150214-2
 
 主要变更：
-	1、实现了vpc的所有功能
+	1、增加add_forwarder、modify_forwarder将参数打印到日志的功能，方便定位各位模块的问题。
+	
+********************************
+
+版本号：intelligent_router2.0#20150212-1
+
+主要变更：
+	1、将ParamKeyDefine.output_port_range修改为ParamKeyDefine.range。
 	
 ********************************
 
@@ -194,7 +213,6 @@ cs: need > control_server2.0#20150911-1
 	1、修复local variable 'output_port_snat_count' referenced before assignment的bug。
 
 ******************************************************
-
 版本号：intelligent_router2.0#20150202-1
 
 主要变更：
