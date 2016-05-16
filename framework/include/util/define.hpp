@@ -629,6 +629,11 @@ namespace zhicloud{
             snapshot = 158,
             io = 159,
             priority = 160,
+
+            time = 164,
+            bit = 165,
+            frame = 166,
+            file = 167,
         };
     }
 }
